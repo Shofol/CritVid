@@ -1,0 +1,383 @@
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { safeArrayAccess } from '@/lib/utils';
+
+interface DrawingCanvasProps {
+  containerRef: React.RefObject<HTMLDivElement>;
+  isActive: boolean;
+  videoRef: React.RefObject<HTMLVideoElement>;
+  isRecording: boolean;
+  onDrawAction?: (action: any) => void;
+}
+
+interface DrawAction {
+  path: { x: number; y: number }[];
+  timestamp: number;
+  startTime: number;
+  endTime: number;
+  color: string;
+  width: number;
+  id: string;
+}
+
+const DRAWING_FADE_DURATION = 1;
+
+const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
+  containerRef,
+  isActive,
+  videoRef,
+  isRecording,
+  onDrawAction
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [currentPath, setCurrentPath] = useState<{ x: number; y: number }[]>([]);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawColor, setDrawColor] = useState('#ff0000');
+  const [drawWidth, setDrawWidth] = useState(2);
+  const [liveDrawings, setLiveDrawings] = useState<DrawAction[]>([]);
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 450 });
+  const cleanupRef = useRef<(() => void)[]>([]);
+  const animationFrameRef = useRef<number | null>(null);
+  const isDrawingRef = useRef(false);
+
+  const performCleanup = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    
+    cleanupRef.current.forEach(cleanup => {
+      try {
+        cleanup();
+      } catch (error) {
+        console.error('Drawing cleanup error:', error);
+      }
+    });
+    cleanupRef.current = [];
+    
+    setIsDrawing(false);
+    setCurrentPath([]);
+    isDrawingRef.current = false;
+  }, []);
+
+  useEffect(() => {
+    if (!isActive) {
+      performCleanup();
+    }
+    
+    return () => {
+      performCleanup();
+    };
+  }, [isActive, performCleanup]);
+
+  const updateCanvasSize = useCallback(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    
+    if (!container || !canvas || !video) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newWidth = containerRect.width;
+    const newHeight = containerRect.height;
+    
+    if (newWidth > 0 && newHeight > 0) {
+      setCanvasSize({ width: newWidth, height: newHeight });
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+      canvas.style.width = `${newWidth}px`;
+      canvas.style.height = `${newHeight}px`;
+    }
+  }, [containerRef, videoRef]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      const handleLoadedMetadata = () => updateCanvasSize();
+      const handleResize = () => updateCanvasSize();
+      
+      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      video.addEventListener('resize', handleResize);
+      window.addEventListener('resize', handleResize);
+      
+      cleanupRef.current.push(() => {
+        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        video.removeEventListener('resize', handleResize);
+        window.removeEventListener('resize', handleResize);
+      });
+      
+      if (video.readyState >= 1) {
+        updateCanvasSize();
+      }
+    }
+  }, [videoRef, updateCanvasSize]);
+
+  const renderLiveStroke = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    liveDrawings.forEach((drawing) => {
+      if (drawing.path.length > 1) {
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = drawing.color;
+        ctx.lineWidth = drawing.width;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        ctx.beginPath();
+        ctx.moveTo(drawing.path[0].x, drawing.path[0].y);
+        for (let i = 1; i < drawing.path.length; i++) {
+          ctx.lineTo(drawing.path[i].x, drawing.path[i].y);
+        }
+        ctx.stroke();
+      }
+    });
+    
+    if (currentPath.length > 0) {
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = drawColor;
+      ctx.lineWidth = drawWidth;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      
+      ctx.beginPath();
+      ctx.moveTo(currentPath[0].x, currentPath[0].y);
+      for (let i = 1; i < currentPath.length; i++) {
+        ctx.lineTo(currentPath[i].x, currentPath[i].y);
+      }
+      ctx.stroke();
+    }
+  }, [currentPath, drawColor, drawWidth, liveDrawings]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !isActive) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const animate = () => {
+      if (isActive) {
+        renderLiveStroke();
+        animationFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    cleanupRef.current.push(() => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    });
+  }, [isActive, renderLiveStroke]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+    if (!canvas || !video) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.globalAlpha = 1;
+    
+    let currentDrawPath: { x: number; y: number }[] = [];
+
+    const getMousePos = (e: MouseEvent | TouchEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height),
+      };
+    };
+
+    const handleStart = (pos: { x: number; y: number }) => {
+      if (!isActive || !isRecording) return;
+      
+      isDrawingRef.current = true;
+      setIsDrawing(true);
+      currentDrawPath = [pos];
+      setCurrentPath(safeArrayAccess([pos]));
+    };
+
+    const handleMove = (pos: { x: number; y: number }) => {
+      if (!isDrawingRef.current || !isActive || !isRecording) return;
+      
+      currentDrawPath.push(pos);
+      setCurrentPath(safeArrayAccess([...currentDrawPath]));
+    };
+
+    const handleEnd = () => {
+      if (!isDrawingRef.current || !videoRef.current || !isActive || !isRecording) return;
+      
+      isDrawingRef.current = false;
+      setIsDrawing(false);
+      
+      if (currentDrawPath.length > 0) {
+        const currentTime = videoRef.current.currentTime;
+        const drawAction: DrawAction = {
+          path: safeArrayAccess([...currentDrawPath]),
+          timestamp: currentTime,
+          startTime: currentTime,
+          endTime: currentTime + DRAWING_FADE_DURATION,
+          color: drawColor || '#ff0000',
+          width: drawWidth || 2,
+          id: `draw_${Date.now()}_${Math.random()}`
+        };
+        
+        console.log('✏️ Drawing action created:', drawAction);
+        
+        setLiveDrawings(prev => [...prev, drawAction]);
+        
+        if (onDrawAction) {
+          onDrawAction(drawAction);
+        }
+        
+        setTimeout(() => {
+          setLiveDrawings(prev => prev.filter(d => d.id !== drawAction.id));
+        }, DRAWING_FADE_DURATION * 1000 + 100);
+      }
+      setCurrentPath([]);
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      e.preventDefault();
+      handleStart(getMousePos(e));
+    };
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      handleMove(getMousePos(e));
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      e.preventDefault();
+      handleEnd();
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      handleStart(getMousePos(e));
+    };
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      handleMove(getMousePos(e));
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      handleEnd();
+    };
+
+    if (isActive && isRecording) {
+      canvas.addEventListener("mousedown", handleMouseDown);
+      canvas.addEventListener("mousemove", handleMouseMove);
+      canvas.addEventListener("mouseup", handleMouseUp);
+      canvas.addEventListener("mouseleave", handleEnd);
+      canvas.addEventListener("touchstart", handleTouchStart);
+      canvas.addEventListener("touchmove", handleTouchMove);
+      canvas.addEventListener("touchend", handleTouchEnd);
+
+      cleanupRef.current.push(() => {
+        canvas.removeEventListener("mousedown", handleMouseDown);
+        canvas.removeEventListener("mousemove", handleMouseMove);
+        canvas.removeEventListener("mouseup", handleMouseUp);
+        canvas.removeEventListener("mouseleave", handleEnd);
+        canvas.removeEventListener("touchstart", handleTouchStart);
+        canvas.removeEventListener("touchmove", handleTouchMove);
+        canvas.removeEventListener("touchend", handleTouchEnd);
+      });
+    }
+  }, [drawColor, drawWidth, isActive, isRecording, videoRef, onDrawAction]);
+
+  const handleClearCanvasVisual = () => {
+    setLiveDrawings([]);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  };
+
+  if (!isActive) {
+    return null;
+  }
+
+  return (
+    <>
+      <canvas
+        ref={canvasRef}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        className={`absolute top-0 left-0 ${isActive && isRecording ? 'cursor-crosshair' : 'pointer-events-none'}`}
+        style={{ 
+          pointerEvents: isActive && isRecording ? 'auto' : 'none',
+          width: '100%',
+          height: '100%',
+          touchAction: 'none',
+          zIndex: isActive ? 10 : 1,
+          opacity: 1,
+          backgroundColor: 'transparent'
+        }}
+      />
+      
+      {isActive && isRecording && (
+        <div className="absolute bottom-4 left-4 bg-white p-3 rounded-lg shadow-lg border space-y-2 z-20">
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium">Color:</label>
+            <input
+              type="color"
+              value={drawColor || '#ff0000'}
+              onChange={(e) => setDrawColor(e.target.value)}
+              className="w-8 h-6 rounded border"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium">Width:</label>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={drawWidth || 2}
+              onChange={(e) => setDrawWidth(Number(e.target.value))}
+              className="w-16"
+            />
+            <span className="text-xs">{drawWidth || 2}px</span>
+          </div>
+          <Button
+            onClick={handleClearCanvasVisual}
+            size="sm"
+            variant="outline"
+            className="w-full text-xs"
+          >
+            Clear Canvas
+          </Button>
+          {isDrawing && (
+            <div className="text-xs text-blue-600 font-medium">
+              ✏️ Drawing... ({currentPath.length} points)
+            </div>
+          )}
+          <div className="text-xs text-green-600">
+            🎨 Live: {liveDrawings.length} drawings
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default DrawingCanvasFixed;
