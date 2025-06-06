@@ -1,4 +1,5 @@
 import { safeArrayAccess } from "@/lib/utils";
+import { Edit } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 interface DrawingCanvasProps {
@@ -6,7 +7,7 @@ interface DrawingCanvasProps {
   isActive: boolean;
   videoRef: React.RefObject<HTMLVideoElement>;
   isRecording: boolean;
-  onDrawAction?: (action: any) => void;
+  onDrawAction?: (action: DrawAction) => void;
 }
 
 interface DrawAction {
@@ -37,6 +38,7 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
   const [drawWidth, setDrawWidth] = useState(2);
   const [liveDrawings, setLiveDrawings] = useState<DrawAction[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 450 });
+  const [isControlsExpanded, setIsControlsExpanded] = useState(true);
   const cleanupRef = useRef<(() => void)[]>([]);
   const animationFrameRef = useRef<number | null>(null);
   const isDrawingRef = useRef(false);
@@ -348,29 +350,63 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
       />
 
       {isActive && isRecording && (
-        <div className="absolute top-20 right-4 bg-white p-3 rounded-sm shadow-lg border space-y-2 z-20">
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-medium">Color:</label>
-            <input
-              type="color"
-              value={drawColor || "#ff0000"}
-              onChange={(e) => setDrawColor(e.target.value)}
-              className="w-8 h-6 rounded border"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-medium">Width:</label>
-            <input
-              type="range"
-              min="1"
-              max="10"
-              value={drawWidth || 2}
-              onChange={(e) => setDrawWidth(Number(e.target.value))}
-              className="w-16"
-            />
-            <span className="text-xs">{drawWidth || 2}px</span>
-          </div>
-        </div>
+        <>
+          {isControlsExpanded ? (
+            <div className="absolute top-20 right-4 bg-white p-3 rounded-sm shadow-lg border space-y-2 z-20">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-gray-700">
+                  Drawing Controls
+                </span>
+                <button
+                  onClick={() => setIsControlsExpanded(false)}
+                  className="text-gray-400 hover:text-gray-600 p-1"
+                  title="Minimize controls"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium">Color:</label>
+                <input
+                  type="color"
+                  value={drawColor || "#ff0000"}
+                  onChange={(e) => setDrawColor(e.target.value)}
+                  className="w-8 h-6 rounded border"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium">Width:</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={drawWidth || 2}
+                  onChange={(e) => setDrawWidth(Number(e.target.value))}
+                  className="w-16"
+                />
+                <span className="text-xs">{drawWidth || 2}px</span>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsControlsExpanded(true)}
+              className="absolute top-20 right-4 p-0 h-10 w-10 flex items-center justify-center bg-white rounded-full shadow-lg border hover:bg-gray-50 z-20"
+              title="Open drawing controls"
+            >
+              <Edit className="h-4 w-4" />
+            </button>
+          )}
+        </>
       )}
     </>
   );

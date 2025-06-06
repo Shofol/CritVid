@@ -175,7 +175,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
             // }}
           >
             {!videoPlaying && (
-              <div className="absolute top-0 left-0 bg-black/50 w-full h-full rounded-lg flex items-center justify-center">
+              <div className="absolute top-0 left-0 bg-black/50 w-full h-full rounded-lg flex items-center justify-center z-20">
                 <button
                   onClick={() => {
                     videoRef.current?.play();
