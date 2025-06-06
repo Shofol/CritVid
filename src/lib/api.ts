@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { getAuthToken } from "./authUtils";
 
 export interface AdjudicatorProfile {
   id?: string;
@@ -29,65 +29,68 @@ export interface AdjudicatorProfile {
 }
 
 // Get the adjudicator profile
-export const getAdjudicatorProfile = async (userId?: string): Promise<AdjudicatorProfile | null> => {
+export const getAdjudicatorProfile = async (
+  userId?: string
+): Promise<AdjudicatorProfile | null> => {
   try {
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) throw sessionError;
-    
-    const token = sessionData?.session?.access_token;
-    if (!token) throw new Error('No access token available');
+    const token = await getAuthToken();
+    if (!token) throw new Error("No access token available");
 
-    const url = new URL('https://tasowytszirhdvdiwuia.supabase.co/functions/v1/7b5389d0-b6f3-4881-91c5-ce003858a30a');
+    const url = new URL(
+      "https://tasowytszirhdvdiwuia.supabase.co/functions/v1/7b5389d0-b6f3-4881-91c5-ce003858a30a"
+    );
     if (userId) {
-      url.searchParams.append('userId', userId);
+      url.searchParams.append("userId", userId);
     }
 
     const response = await fetch(url.toString(), {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
 
     const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.error || 'Failed to fetch profile');
+      throw new Error(result.error || "Failed to fetch profile");
     }
 
     return result.profile;
   } catch (error) {
-    console.error('Error fetching adjudicator profile:', error);
+    console.error("Error fetching adjudicator profile:", error);
     throw error;
   }
 };
 
 // Update the adjudicator profile
-export const updateAdjudicatorProfile = async (profile: AdjudicatorProfile): Promise<AdjudicatorProfile> => {
+export const updateAdjudicatorProfile = async (
+  profile: AdjudicatorProfile
+): Promise<AdjudicatorProfile> => {
   try {
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) throw sessionError;
-    
-    const token = sessionData?.session?.access_token;
-    if (!token) throw new Error('No access token available');
+    const token = await getAuthToken();
+    if (!token) throw new Error("No access token available");
 
-    const response = await fetch('https://tasowytszirhdvdiwuia.supabase.co/functions/v1/0627b4c6-b5d9-49dd-8e6e-45e128967d68', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ profile })
-    });
+    const response = await fetch(
+      "https://tasowytszirhdvdiwuia.supabase.co/functions/v1/0627b4c6-b5d9-49dd-8e6e-45e128967d68",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ profile }),
+      }
+    );
 
     const result = await response.json();
     if (!response.ok) {
-      throw new Error(result.error || 'Failed to update profile');
+      throw new Error(result.error || "Failed to update profile");
     }
 
     return result.profile;
   } catch (error) {
-    console.error('Error updating adjudicator profile:', error);
+    console.error("Error updating adjudicator profile:", error);
     throw error;
   }
 };
@@ -98,69 +101,82 @@ export const saveAudioCritique = async (audioBlob: Blob, videoId: string) => {
     // For now, we'll implement a simple version that saves to localStorage
     // In a real implementation, this would upload to Supabase storage
     const audioUrl = URL.createObjectURL(audioBlob);
-    
+
     // Save blob data to localStorage (this is just for demo purposes)
     // In production, we would upload to a server/storage
     const reader = new FileReader();
-    
-    return new Promise<{ success: boolean; url?: string; error?: string }>((resolve) => {
-      reader.onloadend = () => {
-        try {
-          // Store the base64 data
-          localStorage.setItem(`audio_data_${videoId}`, reader.result as string);
-          localStorage.setItem(`last_saved_${videoId}`, new Date().toISOString());
-          
-          // Get existing recordings or create new array
-          const existingData = localStorage.getItem(`recordings_${videoId}`);
-          const recordings = existingData ? JSON.parse(existingData) : [];
-          
-          // Add new recording URL
-          recordings.push(audioUrl);
-          
-          // Save updated recordings list
-          localStorage.setItem(`recordings_${videoId}`, JSON.stringify(recordings));
-          
-          resolve({
-            success: true,
-            url: audioUrl,
-          });
-        } catch (e) {
-          console.error('Error saving to localStorage:', e);
+
+    return new Promise<{ success: boolean; url?: string; error?: string }>(
+      (resolve) => {
+        reader.onloadend = () => {
+          try {
+            // Store the base64 data
+            localStorage.setItem(
+              `audio_data_${videoId}`,
+              reader.result as string
+            );
+            localStorage.setItem(
+              `last_saved_${videoId}`,
+              new Date().toISOString()
+            );
+
+            // Get existing recordings or create new array
+            const existingData = localStorage.getItem(`recordings_${videoId}`);
+            const recordings = existingData ? JSON.parse(existingData) : [];
+
+            // Add new recording URL
+            recordings.push(audioUrl);
+
+            // Save updated recordings list
+            localStorage.setItem(
+              `recordings_${videoId}`,
+              JSON.stringify(recordings)
+            );
+
+            resolve({
+              success: true,
+              url: audioUrl,
+            });
+          } catch (e) {
+            console.error("Error saving to localStorage:", e);
+            resolve({
+              success: false,
+              error: "Failed to save recording to local storage",
+            });
+          }
+        };
+
+        reader.onerror = () => {
           resolve({
             success: false,
-            error: 'Failed to save recording to local storage',
+            error: "Error reading audio data",
           });
-        }
-      };
-      
-      reader.onerror = () => {
-        resolve({
-          success: false,
-          error: 'Error reading audio data',
-        });
-      };
-      
-      reader.readAsDataURL(audioBlob);
-    });
+        };
+
+        reader.readAsDataURL(audioBlob);
+      }
+    );
   } catch (error) {
-    console.error('Error in saveAudioCritique:', error);
+    console.error("Error in saveAudioCritique:", error);
     return {
       success: false,
-      error: 'An unexpected error occurred',
+      error: "An unexpected error occurred",
     };
   }
 };
 
 // Generate exercise suggestions using AI
-export const generateExerciseSuggestions = async (prompt: string): Promise<string[]> => {
+export const generateExerciseSuggestions = async (
+  prompt: string
+): Promise<string[]> => {
   try {
     // Call our Supabase Edge Function
     const response = await fetch(
-      'https://tasowytszirhdvdiwuia.supabase.co/functions/v1/c0d997fb-829c-4cc4-8b38-66b44f21e3f6',
+      "https://tasowytszirhdvdiwuia.supabase.co/functions/v1/c0d997fb-829c-4cc4-8b38-66b44f21e3f6",
       {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
       }
     );
 
@@ -173,18 +189,18 @@ export const generateExerciseSuggestions = async (prompt: string): Promise<strin
       const jsonData = JSON.parse(data);
       return jsonData.suggestions || [];
     } catch (parseError) {
-      console.error('Error parsing JSON:', parseError, 'Raw response:', data);
+      console.error("Error parsing JSON:", parseError, "Raw response:", data);
       return [];
     }
   } catch (error) {
-    console.error('Error generating suggestions:', error);
+    console.error("Error generating suggestions:", error);
     // Fallback to mock data if the API call fails
     return [
       "Practice relevé in parallel position to strengthen ankles",
       "Focus on core engagement during pirouettes",
       "Work on port de bras with resistance bands",
       "Practice petit allegro to improve quick footwork",
-      "Try balance exercises on a balance board"
+      "Try balance exercises on a balance board",
     ];
   }
 };
@@ -201,19 +217,22 @@ export const saveVideoCritiqueDraft = async (draft: {
     // For demo purposes, we'll use localStorage
     const draftData = {
       ...draft,
-      savedAt: new Date().toISOString()
+      savedAt: new Date().toISOString(),
     };
-    
-    localStorage.setItem(`critique_draft_${draft.videoId}`, JSON.stringify(draftData));
-    
+
+    localStorage.setItem(
+      `critique_draft_${draft.videoId}`,
+      JSON.stringify(draftData)
+    );
+
     return {
-      success: true
+      success: true,
     };
   } catch (error) {
-    console.error('Error saving draft:', error);
+    console.error("Error saving draft:", error);
     return {
       success: false,
-      error: 'Failed to save draft'
+      error: "Failed to save draft",
     };
   }
 };
@@ -223,10 +242,10 @@ export const loadVideoCritiqueDraft = (videoId: string) => {
   try {
     const draftData = localStorage.getItem(`critique_draft_${videoId}`);
     if (!draftData) return null;
-    
+
     return JSON.parse(draftData);
   } catch (error) {
-    console.error('Error loading draft:', error);
+    console.error("Error loading draft:", error);
     return null;
   }
 };

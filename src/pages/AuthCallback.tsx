@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
-import { handleOAuthUserCreation } from '@/lib/auth';
+import { supabase } from "@/lib/supabase";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -13,37 +12,32 @@ const AuthCallback: React.FC = () => {
       try {
         // Handle the OAuth callback
         const { data, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           throw error;
         }
 
         if (data.session?.user) {
-          // Check if this is an OAuth user and create user record if needed
-          const isOAuthUser = data.session.user.app_metadata?.provider && 
-                              data.session.user.app_metadata.provider !== 'email';
-          
-          if (isOAuthUser) {
-            await handleOAuthUserCreation(data.session.user);
-          }
+          // OAuth user creation is now handled by the useAuth hook automatically
 
           // Get the return URL from sessionStorage or default to dashboard
-          const returnUrl = sessionStorage.getItem('authReturnUrl') || '/dashboard';
-          sessionStorage.removeItem('authReturnUrl'); // Clean up
+          const returnUrl =
+            sessionStorage.getItem("authReturnUrl") || "/dashboard";
+          sessionStorage.removeItem("authReturnUrl"); // Clean up
 
           // Redirect to intended destination
           navigate(returnUrl, { replace: true });
         } else {
           // No session found, redirect to login
-          navigate('/login', { replace: true });
+          navigate("/login", { replace: true });
         }
-      } catch (err: any) {
-        console.error('Auth callback error:', err);
-        setError(err.message || 'Authentication failed');
-        
+      } catch (err: unknown) {
+        console.error("Auth callback error:", err);
+        setError(err instanceof Error ? err.message : "Authentication failed");
+
         // Redirect to login after error
         setTimeout(() => {
-          navigate('/login', { replace: true });
+          navigate("/login", { replace: true });
         }, 3000);
       } finally {
         setIsLoading(false);
@@ -57,7 +51,9 @@ const AuthCallback: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-red-600 mb-2">Authentication Error</h1>
+          <h1 className="text-xl font-semibold text-red-600 mb-2">
+            Authentication Error
+          </h1>
           <p className="text-gray-600 mb-4">{error}</p>
           <p className="text-sm text-gray-500">Redirecting to login...</p>
         </div>
@@ -75,4 +71,4 @@ const AuthCallback: React.FC = () => {
   );
 };
 
-export default AuthCallback; 
+export default AuthCallback;
