@@ -1,10 +1,10 @@
-import { Play } from "lucide-react";
+import { Highlighter, Play } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useUnifiedCritiqueScreenRecording } from "../hooks/useUnifiedCritiqueScreenRecording";
 import DrawingCanvasFixed from "./DrawingCanvasFixed";
-import { Button } from "./ui/button";
 import UnifiedCritiqueControls from "./UnifiedCritiqueControls";
 import VideoControls from "./VideoControls";
+import { Button } from "./ui/button";
 
 interface PlaybackTrackerProps {
   videoUrl: string;
@@ -23,7 +23,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
   videoRef,
   onPreviewCritique,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -147,7 +147,6 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
     <div className="space-y-6">
       <div className="space-y-4">
         <div
-          ref={containerRef}
           className="relative border border-gray-200 p-5 rounded-lg "
           style={{ aspectRatio: "16/9" }}
         >
@@ -163,6 +162,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
             errorMessage={errorMessage}
           />
           <div
+            ref={videoContainerRef}
             className="rounded-lg overflow-hidden relative group"
             // onClick={() => {
             //   if (videoPlaying) {
@@ -187,6 +187,15 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
                 </button>
               </div>
             )}
+            <Button
+              onClick={handleDrawingToggle}
+              variant={isDrawingMode ? "default" : "outline"}
+              className={`absolute top-5 right-5 z-20 rounded-full h-10 w-10 p-0 ${isDrawingMode ? "bg-blue-600 hover:bg-blue-700" : ""}`}
+              disabled={!isRecording}
+            >
+              <Highlighter className="h-4 w-4" />
+            </Button>
+
             <video
               ref={videoRef}
               src={effectiveVideoUrl}
@@ -194,30 +203,18 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
               preload="metadata"
               playsInline
             />
-            <div className="group-hover:opacity-100 opacity-0 transition-all duration-300 absolute bottom-0 left-0 right-0">
+            <div className="group-hover:opacity-100 opacity-0 transition-all duration-300 absolute bottom-0 left-0 right-0 z-20">
               <VideoControls videoRef={videoRef} />
             </div>
+
+            <DrawingCanvasFixed
+              containerRef={videoContainerRef}
+              isActive={isDrawingMode}
+              videoRef={videoRef}
+              isRecording={isRecording}
+              onDrawAction={handleDrawAction}
+            />
           </div>
-
-          <DrawingCanvasFixed
-            containerRef={containerRef}
-            isActive={isDrawingMode}
-            videoRef={videoRef}
-            isRecording={isRecording}
-            onDrawAction={handleDrawAction}
-          />
-
-          {isDrawingMode && isRecording && (
-            <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium z-20">
-              ✏️ Drawing Mode Active
-            </div>
-          )}
-
-          {!isRecording && isDrawingMode && (
-            <div className="absolute top-4 left-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium z-20">
-              ⚠️ Start Recording to Draw
-            </div>
-          )}
 
           {videoError && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/75 z-10">
@@ -241,50 +238,6 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
             </div>
           )}
         </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <Button
-            onClick={handleDrawingToggle}
-            variant={isDrawingMode ? "default" : "outline"}
-            className={isDrawingMode ? "bg-green-600 hover:bg-green-700" : ""}
-            disabled={!isRecording}
-          >
-            {isDrawingMode ? "Exit Drawing" : "Enable Drawing"}
-          </Button>
-
-          {isDrawingMode && isRecording && (
-            <div className="text-sm text-green-600 font-medium">
-              ✏️ Drawing enabled! Click and drag on the video to draw
-              annotations.
-            </div>
-          )}
-
-          {isDrawingMode && !isRecording && (
-            <div className="text-sm text-yellow-600 font-medium">
-              ⚠️ Start recording to enable drawing functionality.
-            </div>
-          )}
-        </div>
-
-        {/* <div className="text-center space-y-2">
-          <div className="text-sm text-gray-600">
-            Video: {videoLoaded ? '✅ Loaded' : videoError ? '❌ Error' : '⏳ Loading...'} |
-            Drawing: {isDrawingMode ? (isRecording ? '✅ Active' : '⚠️ Needs Recording') : '❌ Disabled'} |
-            Recording: {isRecording ? '🔴 Active' : '⭕ Stopped'}
-          </div>
-
-          {drawActions.length > 0 && (
-            <div className="text-xs text-blue-600">
-              {drawActions.length} drawing(s) recorded
-            </div>
-          )}
-
-          <div className="text-xs text-gray-500">
-            💡 Tip: Start recording first, then enable drawing mode to create annotations.
-          </div>
-        </div> */}
       </div>
     </div>
   );
