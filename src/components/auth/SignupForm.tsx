@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { signUpWithEmail, signUpWithGoogle } from '@/lib/auth';
-import { sendWelcomeEmail } from '@/lib/email';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { signUpWithEmail, signUpWithGoogle } from "@/lib/auth";
+import { AlertCircle } from "lucide-react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function SignupForm() {
   const navigate = useNavigate();
@@ -17,20 +16,20 @@ export function SignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    agreeTerms: false
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    agreeTerms: false,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxChange = (checked: boolean) => {
-    setFormData(prev => ({ ...prev, agreeTerms: checked }));
+    setFormData((prev) => ({ ...prev, agreeTerms: checked }));
   };
 
   const handleGoogleSignup = async () => {
@@ -41,10 +40,10 @@ export function SignupForm() {
       const { success, error } = await signUpWithGoogle();
 
       if (!success || error) {
-        throw error || new Error('Failed to sign up with Google');
+        throw error || new Error("Failed to sign up with Google");
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during Google signup');
+      setError(err.message || "An error occurred during Google signup");
     } finally {
       setIsGoogleLoading(false);
     }
@@ -57,17 +56,17 @@ export function SignupForm() {
 
     // Validation
     if (!formData.fullName || !formData.email || !formData.password) {
-      setError('Please fill in all required fields');
+      setError("Please fill in all required fields");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     if (!formData.agreeTerms) {
-      setError('You must agree to the terms and conditions');
+      setError("You must agree to the terms and conditions");
       return;
     }
 
@@ -82,22 +81,20 @@ export function SignupForm() {
       );
 
       if (!success || error) {
-        throw error || new Error('Failed to create account');
+        throw error || new Error("Failed to create account");
       }
 
-      // Send welcome email
-      await sendWelcomeEmail(formData.email, formData.fullName);
-
       // Show success message or redirect
-      setSuccess('Account created! Please check your email to verify your account.');
-      
+      setSuccess(
+        "Account created! Please check your email to verify your account."
+      );
+
       // Redirect to verification page after a short delay
       setTimeout(() => {
-        navigate('/email-verification', { state: { email: formData.email } });
+        navigate("/email-verification", { state: { email: formData.email } });
       }, 2000);
-      
     } catch (err: any) {
-      setError(err.message || 'An error occurred during signup');
+      setError(err.message || "An error occurred during signup");
     } finally {
       setIsLoading(false);
     }
@@ -112,12 +109,14 @@ export function SignupForm() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      
+
       {success && (
         <Alert variant="default" className="bg-green-50 border-green-200">
           <AlertCircle className="h-4 w-4 text-green-600" />
           <AlertTitle className="text-green-800">Success</AlertTitle>
-          <AlertDescription className="text-green-700">{success}</AlertDescription>
+          <AlertDescription className="text-green-700">
+            {success}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -129,10 +128,19 @@ export function SignupForm() {
         onClick={handleGoogleSignup}
         disabled={isGoogleLoading || isLoading}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" className="mr-2">
-          <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          className="mr-2"
+        >
+          <path
+            fill="currentColor"
+            d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+          />
         </svg>
-        {isGoogleLoading ? 'Signing up with Google...' : 'Continue with Google'}
+        {isGoogleLoading ? "Signing up with Google..." : "Continue with Google"}
       </Button>
 
       <div className="relative">
@@ -211,16 +219,27 @@ export function SignupForm() {
             disabled={isLoading || isGoogleLoading}
           />
           <Label htmlFor="agreeTerms" className="text-sm cursor-pointer">
-            I agree to the <a href="/terms" className="text-primary hover:underline">Terms of Service</a> and <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
+            I agree to the{" "}
+            <a href="/terms" className="text-primary hover:underline">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="/privacy" className="text-primary hover:underline">
+              Privacy Policy
+            </a>
           </Label>
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
-          {isLoading ? 'Creating Account...' : 'Create Account'}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isLoading || isGoogleLoading}
+        >
+          {isLoading ? "Creating Account..." : "Create Account"}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <a href="/login" className="text-primary hover:underline">
             Sign in
           </a>
