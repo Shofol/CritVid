@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Video, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import AudioVolumeControl from './AudioVolumeControl';
+
 import { AudioMixSettings } from '@/types/drawingTypes';
 import { VideoTimestamp } from '@/types/muxTypes';
 
@@ -303,15 +303,7 @@ const MuxCritiquePlayer: React.FC<MuxCritiquePlayerProps> = ({
           )}
         </div>
         
-        {/* Audio Volume Controls */}
-        {audioUrl && (
-          <div className="mt-4">
-            <AudioVolumeControl 
-              audioSettings={audioSettings}
-              onVolumeChange={handleVolumeChange}
-            />
-          </div>
-        )}
+        {/* Audio Volume Controls - Removed for simplicity */}
         
         <div className="mt-4 p-3 bg-muted rounded-md">
           <p className="text-sm">

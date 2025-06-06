@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Video, AlertCircle, RefreshCw } from 'lucide-react';
-import DrawingCanvas from './DrawingCanvas';
-import { TimestampedDrawing, VideoTimestamp } from '@/types/muxTypes';
+import { VideoTimestamp } from '@/types/muxTypes';
 
 interface MuxVideoPlayerProps {
   videoUrl: string;
@@ -179,7 +178,6 @@ const MuxVideoPlayer: React.FC<MuxVideoPlayerProps> = ({
             <source src="/sample-dance-video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
-          <DrawingCanvas isDrawing={isDrawingMode} videoRef={videoRef} />
         </div>
         
         <div className="flex justify-between mt-4">
