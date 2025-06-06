@@ -1,85 +1,135 @@
+import React, { Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 
-// Pages
-import AuthCallback from "@/pages/AuthCallback";
-import Checkout from "@/pages/Checkout";
-import ConnectionTestPage from "@/pages/ConnectionTest";
-import Contact from "@/pages/Contact";
-import CritiquePreview from "@/pages/CritiquePreview";
-import Dashboard from "@/pages/Dashboard";
-import DashboardSelector from "@/pages/DashboardSelector";
-import EmailVerification from "@/pages/EmailVerification";
-import FindAdjudicator from "@/pages/FindAdjudicator";
-import ForgotPassword from "@/pages/ForgotPassword";
-import Guidelines from "@/pages/Guidelines";
-import Help from "@/pages/Help";
-import Index from "@/pages/Index";
-import Login from "@/pages/Login";
-import NotFound from "@/pages/NotFound";
-import PlaybackTrackerPageFixed from "@/pages/PlaybackTrackerPageFixed";
-import Privacy from "@/pages/Privacy";
-import PrivateCritique from "@/pages/PrivateCritique";
-import Profile from "@/pages/Profile";
-import ResetPassword from "@/pages/ResetPassword";
-import Reviews from "@/pages/Reviews";
-import RoleSelection from "@/pages/RoleSelection";
-import Signup from "@/pages/Signup";
-import Terms from "@/pages/Terms";
-import ThankYou from "@/pages/ThankYou";
-import UploadVideo from "@/pages/UploadVideo";
-import UserDashboard from "@/pages/UserDashboard";
-import VideoLibrary from "@/pages/VideoLibrary";
-import VideoPlayer from "@/pages/VideoPlayer";
+// Convert all page imports to dynamic imports using React.lazy()
+const AuthCallback = React.lazy(() => import("@/pages/AuthCallback"));
+const Checkout = React.lazy(() => import("@/pages/Checkout"));
+const ConnectionTestPage = React.lazy(() => import("@/pages/ConnectionTest"));
+const Contact = React.lazy(() => import("@/pages/Contact"));
+const CritiquePreview = React.lazy(() => import("@/pages/CritiquePreview"));
+const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
+const DashboardSelector = React.lazy(() => import("@/pages/DashboardSelector"));
+const EmailVerification = React.lazy(() => import("@/pages/EmailVerification"));
+const FindAdjudicator = React.lazy(() => import("@/pages/FindAdjudicator"));
+const ForgotPassword = React.lazy(() => import("@/pages/ForgotPassword"));
+const Guidelines = React.lazy(() => import("@/pages/Guidelines"));
+const Help = React.lazy(() => import("@/pages/Help"));
+const Index = React.lazy(() => import("@/pages/Index"));
+const Login = React.lazy(() => import("@/pages/Login"));
+const NotFound = React.lazy(() => import("@/pages/NotFound"));
+const PlaybackTrackerPageFixed = React.lazy(
+  () => import("@/pages/PlaybackTrackerPageFixed")
+);
+const Privacy = React.lazy(() => import("@/pages/Privacy"));
+const PrivateCritique = React.lazy(() => import("@/pages/PrivateCritique"));
+const Profile = React.lazy(() => import("@/pages/Profile"));
+const ResetPassword = React.lazy(() => import("@/pages/ResetPassword"));
+const Reviews = React.lazy(() => import("@/pages/Reviews"));
+const RoleSelection = React.lazy(() => import("@/pages/RoleSelection"));
+const Signup = React.lazy(() => import("@/pages/Signup"));
+const Terms = React.lazy(() => import("@/pages/Terms"));
+const ThankYou = React.lazy(() => import("@/pages/ThankYou"));
+const UploadVideo = React.lazy(() => import("@/pages/UploadVideo"));
+const UserDashboard = React.lazy(() => import("@/pages/UserDashboard"));
+const VideoLibrary = React.lazy(() => import("@/pages/VideoLibrary"));
+const VideoPlayer = React.lazy(() => import("@/pages/VideoPlayer"));
 
 // Admin pages
-import AdjudicatorAdmin from "@/pages/admin/AdjudicatorAdmin";
-import AdminDashboard from "@/pages/admin/AdminDashboard";
-import AutomationPage from "@/pages/admin/AutomationPage";
-import ClientManagementPage from "@/pages/admin/ClientManagementPage";
-import EmailTemplatesPage from "@/pages/admin/EmailTemplatesPage";
-import PaymentReports from "@/pages/admin/PaymentReports";
-import ReviewManagementPage from "@/pages/admin/ReviewManagementPage";
-import SettingsPage from "@/pages/admin/SettingsPage";
-import StatsPage from "@/pages/admin/StatsPage";
-import StorageManagement from "@/pages/admin/StorageManagement";
-import StudioOwners from "@/pages/admin/StudioOwners";
-import SystemSettings from "@/pages/admin/SystemSettings";
-import TestEmailPage from "@/pages/admin/TestEmailPage";
-import UserManagement from "@/pages/admin/UserManagement";
-import VideoReviewPage from "@/pages/admin/VideoReviewPage";
-import VideoReviewsPage from "@/pages/admin/VideoReviewsPage";
+const AdjudicatorAdmin = React.lazy(
+  () => import("@/pages/admin/AdjudicatorAdmin")
+);
+const AdminDashboard = React.lazy(() => import("@/pages/admin/AdminDashboard"));
+const AutomationPage = React.lazy(() => import("@/pages/admin/AutomationPage"));
+const ClientManagementPage = React.lazy(
+  () => import("@/pages/admin/ClientManagementPage")
+);
+const EmailTemplatesPage = React.lazy(
+  () => import("@/pages/admin/EmailTemplatesPage")
+);
+const PaymentReports = React.lazy(() => import("@/pages/admin/PaymentReports"));
+const ReviewManagementPage = React.lazy(
+  () => import("@/pages/admin/ReviewManagementPage")
+);
+const SettingsPage = React.lazy(() => import("@/pages/admin/SettingsPage"));
+const StatsPage = React.lazy(() => import("@/pages/admin/StatsPage"));
+const StorageManagement = React.lazy(
+  () => import("@/pages/admin/StorageManagement")
+);
+const StudioOwners = React.lazy(() => import("@/pages/admin/StudioOwners"));
+const SystemSettings = React.lazy(() => import("@/pages/admin/SystemSettings"));
+const TestEmailPage = React.lazy(() => import("@/pages/admin/TestEmailPage"));
+const UserManagement = React.lazy(() => import("@/pages/admin/UserManagement"));
+const VideoReviewPage = React.lazy(
+  () => import("@/pages/admin/VideoReviewPage")
+);
+const VideoReviewsPage = React.lazy(
+  () => import("@/pages/admin/VideoReviewsPage")
+);
 
 // Adjudicator pages
-import ApplicationStatus from "@/pages/adjudicator/ApplicationStatus";
-import Apply from "@/pages/adjudicator/Apply";
-import CompletedCritiques from "@/pages/adjudicator/CompletedCritiques";
-import AdjudicatorDashboard from "@/pages/adjudicator/Dashboard";
-import AdjudicatorPayments from "@/pages/adjudicator/Payments";
-import PendingCritiques from "@/pages/adjudicator/PendingCritiques";
-import ProfileEditor from "@/pages/adjudicator/ProfileEditor";
-import AdjudicatorSupport from "@/pages/adjudicator/Support";
+const ApplicationStatus = React.lazy(
+  () => import("@/pages/adjudicator/ApplicationStatus")
+);
+const Apply = React.lazy(() => import("@/pages/adjudicator/Apply"));
+const CompletedCritiques = React.lazy(
+  () => import("@/pages/adjudicator/CompletedCritiques")
+);
+const AdjudicatorDashboard = React.lazy(
+  () => import("@/pages/adjudicator/Dashboard")
+);
+const AdjudicatorPayments = React.lazy(
+  () => import("@/pages/adjudicator/Payments")
+);
+const PendingCritiques = React.lazy(
+  () => import("@/pages/adjudicator/PendingCritiques")
+);
+const ProfileEditor = React.lazy(
+  () => import("@/pages/adjudicator/ProfileEditor")
+);
+const AdjudicatorSupport = React.lazy(
+  () => import("@/pages/adjudicator/Support")
+);
 
 // Studio pages
-import StudioDashboard from "@/pages/studio/Dashboard";
-import SavedCritiques from "@/pages/studio/SavedCritiques";
-import TeamManagement from "@/pages/studio/TeamManagement";
+const StudioDashboard = React.lazy(() => import("@/pages/studio/Dashboard"));
+const SavedCritiques = React.lazy(
+  () => import("@/pages/studio/SavedCritiques")
+);
+const TeamManagement = React.lazy(
+  () => import("@/pages/studio/TeamManagement")
+);
 
 // Client pages
-import Billing from "@/pages/client/Billing";
-import ClientDashboard from "@/pages/client/ClientDashboard";
-import PaymentHistory from "@/pages/client/PaymentHistory";
-import PaymentMethods from "@/pages/client/PaymentMethods";
-import ViewCritique from "@/pages/client/ViewCritique";
+const Billing = React.lazy(() => import("@/pages/client/Billing"));
+const ClientDashboard = React.lazy(
+  () => import("@/pages/client/ClientDashboard")
+);
+const PaymentHistory = React.lazy(
+  () => import("@/pages/client/PaymentHistory")
+);
+const PaymentMethods = React.lazy(
+  () => import("@/pages/client/PaymentMethods")
+);
+const ViewCritique = React.lazy(() => import("@/pages/client/ViewCritique"));
 
 // Demo pages
-import EmailDemo from "@/pages/EmailDemo";
-import MuxVideoDemo from "@/pages/MuxVideoDemo";
+const EmailDemo = React.lazy(() => import("@/pages/EmailDemo"));
+const MuxVideoDemo = React.lazy(() => import("@/pages/MuxVideoDemo"));
 
-// Components
+// Components - Keep auth components as static imports since they're critical
 import AuthDebugger from "@/components/auth/AuthDebugger";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PublicRoute from "@/components/auth/PublicRoute";
-import EmailVerificationPage from "@/pages/EmailVerification";
+
+// Loading component for better UX
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-black text-white">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <p className="text-gray-300">Loading...</p>
+    </div>
+  </div>
+);
 
 function App() {
   return (
@@ -92,7 +142,9 @@ function App() {
         path="/"
         element={
           <PublicRoute>
-            <Index />
+            <Suspense fallback={<PageLoader />}>
+              <Index />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -100,7 +152,9 @@ function App() {
         path="/login"
         element={
           <PublicRoute>
-            <Login />
+            <Suspense fallback={<PageLoader />}>
+              <Login />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -108,7 +162,9 @@ function App() {
         path="/signup"
         element={
           <PublicRoute>
-            <Signup />
+            <Suspense fallback={<PageLoader />}>
+              <Signup />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -116,7 +172,9 @@ function App() {
         path="/auth/callback"
         element={
           <PublicRoute>
-            <AuthCallback />
+            <Suspense fallback={<PageLoader />}>
+              <AuthCallback />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -124,7 +182,9 @@ function App() {
         path="/forgot-password"
         element={
           <PublicRoute>
-            <ForgotPassword />
+            <Suspense fallback={<PageLoader />}>
+              <ForgotPassword />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -132,7 +192,9 @@ function App() {
         path="/reset-password"
         element={
           <PublicRoute>
-            <ResetPassword />
+            <Suspense fallback={<PageLoader />}>
+              <ResetPassword />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -140,7 +202,9 @@ function App() {
         path="/help"
         element={
           <PublicRoute>
-            <Help />
+            <Suspense fallback={<PageLoader />}>
+              <Help />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -148,7 +212,9 @@ function App() {
         path="/email-verification"
         element={
           <PublicRoute>
-            <EmailVerificationPage />
+            <Suspense fallback={<PageLoader />}>
+              <EmailVerification />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -156,7 +222,9 @@ function App() {
         path="/reviews"
         element={
           <PublicRoute>
-            <Reviews />
+            <Suspense fallback={<PageLoader />}>
+              <Reviews />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -164,7 +232,9 @@ function App() {
         path="/contact"
         element={
           <PublicRoute>
-            <Contact />
+            <Suspense fallback={<PageLoader />}>
+              <Contact />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -172,7 +242,9 @@ function App() {
         path="/guidelines"
         element={
           <PublicRoute>
-            <Guidelines />
+            <Suspense fallback={<PageLoader />}>
+              <Guidelines />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -180,7 +252,9 @@ function App() {
         path="/privacy"
         element={
           <PublicRoute>
-            <Privacy />
+            <Suspense fallback={<PageLoader />}>
+              <Privacy />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -188,7 +262,9 @@ function App() {
         path="/terms"
         element={
           <PublicRoute>
-            <Terms />
+            <Suspense fallback={<PageLoader />}>
+              <Terms />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -196,7 +272,9 @@ function App() {
         path="/verify-email"
         element={
           <PublicRoute>
-            <EmailVerification />
+            <Suspense fallback={<PageLoader />}>
+              <EmailVerification />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -206,7 +284,9 @@ function App() {
         path="/connection-test"
         element={
           <PublicRoute>
-            <ConnectionTestPage />
+            <Suspense fallback={<PageLoader />}>
+              <ConnectionTestPage />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -216,7 +296,9 @@ function App() {
         path="/mux-demo"
         element={
           <PublicRoute>
-            <MuxVideoDemo />
+            <Suspense fallback={<PageLoader />}>
+              <MuxVideoDemo />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -224,7 +306,9 @@ function App() {
         path="/email-demo"
         element={
           <PublicRoute>
-            <EmailDemo />
+            <Suspense fallback={<PageLoader />}>
+              <EmailDemo />
+            </Suspense>
           </PublicRoute>
         }
       />
@@ -234,7 +318,9 @@ function App() {
         path="/find-adjudicator"
         element={
           <ProtectedRoute>
-            <FindAdjudicator />
+            <Suspense fallback={<PageLoader />}>
+              <FindAdjudicator />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -242,7 +328,9 @@ function App() {
         path="/find-adjudicator/:id"
         element={
           <ProtectedRoute>
-            <FindAdjudicator />
+            <Suspense fallback={<PageLoader />}>
+              <FindAdjudicator />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -252,7 +340,9 @@ function App() {
         path="/checkout/:videoId/:adjudicatorId"
         element={
           <ProtectedRoute>
-            <Checkout />
+            <Suspense fallback={<PageLoader />}>
+              <Checkout />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -260,7 +350,9 @@ function App() {
         path="/thank-you"
         element={
           <ProtectedRoute>
-            <ThankYou />
+            <Suspense fallback={<PageLoader />}>
+              <ThankYou />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -270,7 +362,9 @@ function App() {
         path="/video/:id"
         element={
           <ProtectedRoute>
-            <CritiquePreview />
+            <Suspense fallback={<PageLoader />}>
+              <CritiquePreview />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -278,7 +372,9 @@ function App() {
         path="/video-player/:id"
         element={
           <ProtectedRoute>
-            <VideoPlayer />
+            <Suspense fallback={<PageLoader />}>
+              <VideoPlayer />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -286,7 +382,9 @@ function App() {
         path="/critique/:id"
         element={
           <ProtectedRoute>
-            <CritiquePreview />
+            <Suspense fallback={<PageLoader />}>
+              <CritiquePreview />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -294,7 +392,9 @@ function App() {
         path="/critique-editor/:videoId"
         element={
           <ProtectedRoute>
-            <PlaybackTrackerPageFixed />
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -302,7 +402,9 @@ function App() {
         path="/critique-editor"
         element={
           <ProtectedRoute>
-            <PlaybackTrackerPageFixed />
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -310,7 +412,9 @@ function App() {
         path="/edit-video/:videoId"
         element={
           <ProtectedRoute>
-            <PlaybackTrackerPageFixed />
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -318,7 +422,9 @@ function App() {
         path="/video-editor/:videoId"
         element={
           <ProtectedRoute>
-            <PlaybackTrackerPageFixed />
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -326,7 +432,9 @@ function App() {
         path="/video-editor"
         element={
           <ProtectedRoute>
-            <PlaybackTrackerPageFixed />
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -334,7 +442,9 @@ function App() {
         path="/playback-tracker/:videoId"
         element={
           <ProtectedRoute>
-            <PlaybackTrackerPageFixed />
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -342,7 +452,9 @@ function App() {
         path="/playback-tracker"
         element={
           <ProtectedRoute>
-            <PlaybackTrackerPageFixed />
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -350,7 +462,9 @@ function App() {
         path="/critique-preview/:videoId"
         element={
           <ProtectedRoute>
-            <CritiquePreview />
+            <Suspense fallback={<PageLoader />}>
+              <CritiquePreview />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -360,7 +474,9 @@ function App() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <Suspense fallback={<PageLoader />}>
+              <Dashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -368,7 +484,9 @@ function App() {
         path="/user-dashboard"
         element={
           <ProtectedRoute>
-            <UserDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <UserDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -376,7 +494,9 @@ function App() {
         path="/video-library"
         element={
           <ProtectedRoute>
-            <VideoLibrary />
+            <Suspense fallback={<PageLoader />}>
+              <VideoLibrary />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -384,7 +504,9 @@ function App() {
         path="/upload-video"
         element={
           <ProtectedRoute>
-            <UploadVideo />
+            <Suspense fallback={<PageLoader />}>
+              <UploadVideo />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -392,7 +514,9 @@ function App() {
         path="/profile"
         element={
           <ProtectedRoute>
-            <Profile />
+            <Suspense fallback={<PageLoader />}>
+              <Profile />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -400,7 +524,9 @@ function App() {
         path="/role-selection"
         element={
           <ProtectedRoute>
-            <RoleSelection />
+            <Suspense fallback={<PageLoader />}>
+              <RoleSelection />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -408,7 +534,9 @@ function App() {
         path="/dashboard-selector"
         element={
           <ProtectedRoute>
-            <DashboardSelector />
+            <Suspense fallback={<PageLoader />}>
+              <DashboardSelector />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -416,7 +544,9 @@ function App() {
         path="/private-critique"
         element={
           <ProtectedRoute>
-            <PrivateCritique />
+            <Suspense fallback={<PageLoader />}>
+              <PrivateCritique />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -426,7 +556,9 @@ function App() {
         path="/admin/dashboard"
         element={
           <ProtectedRoute adminOnly>
-            <AdminDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <AdminDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -434,7 +566,9 @@ function App() {
         path="/admin/users"
         element={
           <ProtectedRoute adminOnly>
-            <UserManagement />
+            <Suspense fallback={<PageLoader />}>
+              <UserManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -442,7 +576,9 @@ function App() {
         path="/admin/adjudicators"
         element={
           <ProtectedRoute adminOnly>
-            <AdjudicatorAdmin />
+            <Suspense fallback={<PageLoader />}>
+              <AdjudicatorAdmin />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -450,7 +586,9 @@ function App() {
         path="/admin/reviews"
         element={
           <ProtectedRoute adminOnly>
-            <ReviewManagementPage />
+            <Suspense fallback={<PageLoader />}>
+              <ReviewManagementPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -458,7 +596,9 @@ function App() {
         path="/admin/email-templates"
         element={
           <ProtectedRoute adminOnly>
-            <EmailTemplatesPage />
+            <Suspense fallback={<PageLoader />}>
+              <EmailTemplatesPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -466,7 +606,9 @@ function App() {
         path="/admin/test-email"
         element={
           <ProtectedRoute adminOnly>
-            <TestEmailPage />
+            <Suspense fallback={<PageLoader />}>
+              <TestEmailPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -474,7 +616,9 @@ function App() {
         path="/admin/video-reviews"
         element={
           <ProtectedRoute adminOnly>
-            <VideoReviewsPage />
+            <Suspense fallback={<PageLoader />}>
+              <VideoReviewsPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -482,7 +626,9 @@ function App() {
         path="/admin/video-review/:id"
         element={
           <ProtectedRoute adminOnly>
-            <VideoReviewPage />
+            <Suspense fallback={<PageLoader />}>
+              <VideoReviewPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -490,7 +636,9 @@ function App() {
         path="/admin/stats"
         element={
           <ProtectedRoute adminOnly>
-            <StatsPage />
+            <Suspense fallback={<PageLoader />}>
+              <StatsPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -498,7 +646,9 @@ function App() {
         path="/admin/settings"
         element={
           <ProtectedRoute adminOnly>
-            <SettingsPage />
+            <Suspense fallback={<PageLoader />}>
+              <SettingsPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -506,7 +656,9 @@ function App() {
         path="/admin/clients"
         element={
           <ProtectedRoute adminOnly>
-            <ClientManagementPage />
+            <Suspense fallback={<PageLoader />}>
+              <ClientManagementPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -514,7 +666,9 @@ function App() {
         path="/admin/studio-owners"
         element={
           <ProtectedRoute adminOnly>
-            <StudioOwners />
+            <Suspense fallback={<PageLoader />}>
+              <StudioOwners />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -522,7 +676,9 @@ function App() {
         path="/admin/system"
         element={
           <ProtectedRoute adminOnly>
-            <SystemSettings />
+            <Suspense fallback={<PageLoader />}>
+              <SystemSettings />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -530,7 +686,9 @@ function App() {
         path="/admin/payments"
         element={
           <ProtectedRoute adminOnly>
-            <PaymentReports />
+            <Suspense fallback={<PageLoader />}>
+              <PaymentReports />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -538,7 +696,9 @@ function App() {
         path="/admin/automation"
         element={
           <ProtectedRoute adminOnly>
-            <AutomationPage />
+            <Suspense fallback={<PageLoader />}>
+              <AutomationPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -546,7 +706,9 @@ function App() {
         path="/admin/storage"
         element={
           <ProtectedRoute adminOnly>
-            <StorageManagement />
+            <Suspense fallback={<PageLoader />}>
+              <StorageManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -556,7 +718,9 @@ function App() {
         path="/adjudicator/dashboard"
         element={
           <ProtectedRoute>
-            <AdjudicatorDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <AdjudicatorDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -564,7 +728,9 @@ function App() {
         path="/adjudicator/pending-critiques"
         element={
           <ProtectedRoute>
-            <PendingCritiques />
+            <Suspense fallback={<PageLoader />}>
+              <PendingCritiques />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -572,7 +738,9 @@ function App() {
         path="/adjudicator/completed-critiques"
         element={
           <ProtectedRoute>
-            <CompletedCritiques />
+            <Suspense fallback={<PageLoader />}>
+              <CompletedCritiques />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -580,7 +748,9 @@ function App() {
         path="/adjudicator/payments"
         element={
           <ProtectedRoute>
-            <AdjudicatorPayments />
+            <Suspense fallback={<PageLoader />}>
+              <AdjudicatorPayments />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -588,7 +758,9 @@ function App() {
         path="/adjudicator/critique-editor/:id"
         element={
           <ProtectedRoute>
-            <PlaybackTrackerPageFixed />
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -596,7 +768,9 @@ function App() {
         path="/adjudicator/profile"
         element={
           <ProtectedRoute>
-            <ProfileEditor />
+            <Suspense fallback={<PageLoader />}>
+              <ProfileEditor />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -604,7 +778,9 @@ function App() {
         path="/adjudicator/application-status"
         element={
           <ProtectedRoute>
-            <ApplicationStatus />
+            <Suspense fallback={<PageLoader />}>
+              <ApplicationStatus />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -612,7 +788,9 @@ function App() {
         path="/adjudicator/apply"
         element={
           <ProtectedRoute>
-            <Apply />
+            <Suspense fallback={<PageLoader />}>
+              <Apply />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -620,7 +798,9 @@ function App() {
         path="/adjudicator/support"
         element={
           <ProtectedRoute>
-            <AdjudicatorSupport />
+            <Suspense fallback={<PageLoader />}>
+              <AdjudicatorSupport />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -630,7 +810,9 @@ function App() {
         path="/studio/dashboard"
         element={
           <ProtectedRoute studioOnly>
-            <StudioDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <StudioDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -638,7 +820,9 @@ function App() {
         path="/studio/saved-critiques"
         element={
           <ProtectedRoute studioOnly>
-            <SavedCritiques />
+            <Suspense fallback={<PageLoader />}>
+              <SavedCritiques />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -646,7 +830,9 @@ function App() {
         path="/studio/team"
         element={
           <ProtectedRoute studioOnly>
-            <TeamManagement />
+            <Suspense fallback={<PageLoader />}>
+              <TeamManagement />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -656,7 +842,9 @@ function App() {
         path="/client/dashboard"
         element={
           <ProtectedRoute>
-            <ClientDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <ClientDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -664,7 +852,9 @@ function App() {
         path="/client/billing"
         element={
           <ProtectedRoute>
-            <Billing />
+            <Suspense fallback={<PageLoader />}>
+              <Billing />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -672,7 +862,9 @@ function App() {
         path="/client/payment-history"
         element={
           <ProtectedRoute>
-            <PaymentHistory />
+            <Suspense fallback={<PageLoader />}>
+              <PaymentHistory />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -680,7 +872,9 @@ function App() {
         path="/client/payment-methods"
         element={
           <ProtectedRoute>
-            <PaymentMethods />
+            <Suspense fallback={<PageLoader />}>
+              <PaymentMethods />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -688,7 +882,9 @@ function App() {
         path="/client/view-critique/:critiqueId"
         element={
           <ProtectedRoute>
-            <ViewCritique />
+            <Suspense fallback={<PageLoader />}>
+              <ViewCritique />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -698,7 +894,9 @@ function App() {
         path="*"
         element={
           <PublicRoute>
-            <NotFound />
+            <Suspense fallback={<PageLoader />}>
+              <NotFound />
+            </Suspense>
           </PublicRoute>
         }
       />
