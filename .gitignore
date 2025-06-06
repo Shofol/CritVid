@@ -27,3 +27,5 @@ dist-ssr
 sendgrid.env.example
 
 *.env
+
+public/video/*

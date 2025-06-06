@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Slider } from './ui/slider';
-import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
+import { Gauge, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Button } from "./ui/button";
+import { Slider } from "./ui/slider";
 
 interface VideoControlsProps {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -13,6 +13,10 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [showSpeedOptions, setShowSpeedOptions] = useState(false);
+
+  const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
   useEffect(() => {
     const video = videoRef.current;
@@ -25,26 +29,30 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
       setVolume(video.volume);
       setIsMuted(video.muted);
     };
+    const updatePlaybackRate = () => setPlaybackRate(video.playbackRate);
 
-    video.addEventListener('timeupdate', updateTime);
-    video.addEventListener('loadedmetadata', updateDuration);
-    video.addEventListener('play', updatePlayState);
-    video.addEventListener('pause', updatePlayState);
-    video.addEventListener('volumechange', updateVolume);
+    video.addEventListener("timeupdate", updateTime);
+    video.addEventListener("loadedmetadata", updateDuration);
+    video.addEventListener("play", updatePlayState);
+    video.addEventListener("pause", updatePlayState);
+    video.addEventListener("volumechange", updateVolume);
+    video.addEventListener("ratechange", updatePlaybackRate);
 
     // Initialize values
     if (video.readyState >= 1) {
       updateDuration();
       updateVolume();
       updatePlayState();
+      updatePlaybackRate();
     }
 
     return () => {
-      video.removeEventListener('timeupdate', updateTime);
-      video.removeEventListener('loadedmetadata', updateDuration);
-      video.removeEventListener('play', updatePlayState);
-      video.removeEventListener('pause', updatePlayState);
-      video.removeEventListener('volumechange', updateVolume);
+      video.removeEventListener("timeupdate", updateTime);
+      video.removeEventListener("loadedmetadata", updateDuration);
+      video.removeEventListener("play", updatePlayState);
+      video.removeEventListener("pause", updatePlayState);
+      video.removeEventListener("volumechange", updateVolume);
+      video.removeEventListener("ratechange", updatePlaybackRate);
     };
   }, [videoRef]);
 
@@ -98,13 +106,26 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  const handleSpeedChange = (speed: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.playbackRate = speed;
+    setPlaybackRate(speed);
+    setShowSpeedOptions(false);
+  };
+
+  const toggleSpeedOptions = () => {
+    setShowSpeedOptions(!showSpeedOptions);
+  };
+
   return (
-    <div className="bg-gray-900 text-white p-4 rounded-lg space-y-3">
+    <div className="bg-transparent text-white p-4 rounded-lg space-y-3 absolute bottom-0 left-0 right-0">
       {/* Progress Bar */}
       <div className="space-y-2">
         <Slider
@@ -127,16 +148,16 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
             onClick={restart}
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-gray-700"
+            className="text-white hover:bg-gray-200"
           >
             <RotateCcw className="w-4 h-4" />
           </Button>
-          
+
           <Button
             onClick={togglePlayPause}
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-gray-700"
+            className="text-white hover:bg-gray-200"
           >
             {isPlaying ? (
               <Pause className="w-5 h-5" />
@@ -144,6 +165,45 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
               <Play className="w-5 h-5" />
             )}
           </Button>
+
+          {/* Speed Control Button */}
+          <div className="relative">
+            <Button
+              onClick={toggleSpeedOptions}
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-gray-200 flex items-center gap-1"
+            >
+              <Gauge className="w-4 h-4" />
+              <span className="text-xs">{playbackRate}x</span>
+            </Button>
+
+            {/* Speed Options Dropdown */}
+            {showSpeedOptions && (
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-gray-800 rounded-lg p-2 shadow-lg border border-gray-700">
+                <div className="text-xs text-gray-300 mb-2 text-center">
+                  Speed
+                </div>
+                <div className="flex flex-col gap-1 min-w-[60px]">
+                  {speedOptions.map((speed) => (
+                    <Button
+                      key={speed}
+                      onClick={() => handleSpeedChange(speed)}
+                      variant={playbackRate === speed ? "default" : "ghost"}
+                      size="sm"
+                      className={`text-xs px-3 py-1 h-7 justify-center ${
+                        playbackRate === speed
+                          ? "bg-blue-600 text-white hover:bg-blue-700"
+                          : "text-gray-300 hover:bg-gray-700"
+                      }`}
+                    >
+                      {speed}x
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Volume Controls */}
@@ -152,11 +212,11 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
             onClick={toggleMute}
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-gray-700"
+            className="text-white hover:bg-gray-200"
           >
-            <Volume2 className={`w-4 h-4 ${isMuted ? 'text-red-400' : ''}`} />
+            <Volume2 className={`w-4 h-4 ${isMuted ? "text-red-400" : ""}`} />
           </Button>
-          
+
           <div className="w-20">
             <Slider
               value={[isMuted ? 0 : volume * 100]}

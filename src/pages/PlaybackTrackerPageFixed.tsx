@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import PlaybackTrackerFixed from '@/components/PlaybackTrackerFixed';
-import PlaybackPreviewPlayerFixed from '@/components/PlaybackPreviewPlayerFixed';
-import { AppLayout } from '@/components/AppLayout';
+import { AppLayout } from "@/components/AppLayout";
+import PlaybackPreviewPlayerFixed from "@/components/PlaybackPreviewPlayerFixed";
+import PlaybackTrackerFixed from "@/components/PlaybackTrackerFixed";
+import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 
 interface DrawAction {
   path: { x: number; y: number }[];
@@ -16,7 +16,7 @@ interface DrawAction {
 }
 
 interface TimelineEvent {
-  type: 'pause' | 'resume' | 'seek' | 'play';
+  type: "pause" | "resume" | "seek" | "play";
   timestamp: number;
   time: number;
   duration?: number;
@@ -38,46 +38,50 @@ const PlaybackTrackerPageFixed: React.FC = () => {
   const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
   const [drawActions, setDrawActions] = useState<DrawAction[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
-  const [videoUrl, setVideoUrl] = useState<string>('https://www.w3schools.com/html/mov_bbb.mp4');
+  const [videoUrl, setVideoUrl] = useState<string>("/video/dance.mp4");
   const [isLoading, setIsLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const savedDraft = localStorage.getItem(`critique_draft_${videoId || 'demo'}`);
+    const savedDraft = localStorage.getItem(
+      `critique_draft_${videoId || "demo"}`
+    );
     if (savedDraft) {
       try {
         const session: CritiqueSession = JSON.parse(savedDraft);
         setRecordedAudioUrl(session.audioUrl);
         setDrawActions(session.drawActions || []);
         setTimelineEvents(session.timelineEvents || []);
-        console.log('📂 Loaded saved draft:', {
+        console.log("📂 Loaded saved draft:", {
           audioUrl: !!session.audioUrl,
           drawActions: session.drawActions?.length || 0,
-          timelineEvents: session.timelineEvents?.length || 0
+          timelineEvents: session.timelineEvents?.length || 0,
         });
       } catch (error) {
-        console.error('Failed to load saved draft:', error);
+        console.error("Failed to load saved draft:", error);
       }
     }
   }, [videoId]);
 
   const handlePreviewCritique = () => {
-    const savedDraft = localStorage.getItem(`critique_draft_${videoId || 'demo'}`);
+    const savedDraft = localStorage.getItem(
+      `critique_draft_${videoId || "demo"}`
+    );
     if (savedDraft) {
       try {
         const session: CritiqueSession = JSON.parse(savedDraft);
         setRecordedAudioUrl(session.audioUrl);
         setDrawActions(session.drawActions || []);
         setTimelineEvents(session.timelineEvents || []);
-        
-        console.log('🎬 Starting preview with data:', {
+
+        console.log("🎬 Starting preview with data:", {
           audioUrl: !!session.audioUrl,
           drawActions: session.drawActions?.length || 0,
           timelineEvents: session.timelineEvents?.length || 0,
-          videoUrl
+          videoUrl,
         });
       } catch (error) {
-        console.error('Failed to load saved draft for preview:', error);
+        console.error("Failed to load saved draft for preview:", error);
       }
     }
     setIsPreview(true);
@@ -102,18 +106,18 @@ const PlaybackTrackerPageFixed: React.FC = () => {
               </button>
             </div>
             <p className="text-gray-600 mt-2">
-              Preview your recorded critique with synchronized audio, video, drawings, and timeline events.
+              Preview your recorded critique with synchronized audio, video,
+              drawings, and timeline events.
             </p>
             <div className="text-sm text-blue-600 mt-2">
-              Audio: {recordedAudioUrl ? '✅ Available' : '❌ None'} | 
-              Drawings: {drawActions.length} | 
-              Timeline Events: {timelineEvents.length}
+              Audio: {recordedAudioUrl ? "✅ Available" : "❌ None"} | Drawings:{" "}
+              {drawActions.length} | Timeline Events: {timelineEvents.length}
             </div>
           </div>
-          
+
           <PlaybackPreviewPlayerFixed
             videoUrl={videoUrl}
-            audioUrl={recordedAudioUrl || ''}
+            audioUrl={recordedAudioUrl || ""}
             drawActions={drawActions}
             timelineEvents={timelineEvents}
           />
@@ -123,26 +127,8 @@ const PlaybackTrackerPageFixed: React.FC = () => {
   }
 
   return (
-    <AppLayout>
-      <div className="container mx-auto py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Critique Studio</h1>
-          <p className="text-gray-600">
-            Record audio commentary and draw annotations while watching the video. 
-            Use the unified controls to start/stop your critique session.
-          </p>
-          {videoId && (
-            <p className="text-sm text-blue-600 mt-2">
-              Editing video: {videoId}
-            </p>
-          )}
-          <div className="text-xs text-gray-500 mt-1">
-            Current data: Audio: {recordedAudioUrl ? '✅' : '❌'} | 
-            Drawings: {drawActions.length} | 
-            Timeline Events: {timelineEvents.length}
-          </div>
-        </div>
-        
+    <AppLayout noHeader={true}>
+      <div className="container mx-auto -mt-16">
         <PlaybackTrackerFixed
           videoUrl={videoUrl}
           setRecordedAudioUrl={setRecordedAudioUrl}
