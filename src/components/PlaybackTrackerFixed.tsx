@@ -1,6 +1,6 @@
 import { Play } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-import { useUnifiedCritiqueFixed } from "../hooks/useUnifiedCritiqueFixed";
+import { useUnifiedCritiqueScreenRecording } from "../hooks/useUnifiedCritiqueScreenRecording";
 import DrawingCanvasFixed from "./DrawingCanvasFixed";
 import { Button } from "./ui/button";
 import UnifiedCritiqueControls from "./UnifiedCritiqueControls";
@@ -30,7 +30,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
 
   const {
     isRecording,
-    recordedAudioUrl,
+    recordedVideoUrl,
     hasRecordedData,
     isSaving,
     permissionStatus,
@@ -40,13 +40,13 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
     saveDraft,
     setDrawActions: addDrawAction,
     handleVideoAction,
-  } = useUnifiedCritiqueFixed(videoRef, videoUrl);
+  } = useUnifiedCritiqueScreenRecording(videoRef, videoUrl);
 
   const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
-    setRecordedAudioUrl(recordedAudioUrl);
-  }, [recordedAudioUrl, setRecordedAudioUrl]);
+    setRecordedAudioUrl(recordedVideoUrl);
+  }, [recordedVideoUrl, setRecordedAudioUrl]);
 
   const effectiveVideoUrl =
     videoUrl || "https://www.w3schools.com/html/mov_bbb.mp4";
@@ -164,15 +164,15 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
           />
           <div
             className="rounded-lg overflow-hidden relative group"
-            onClick={() => {
-              if (videoPlaying) {
-                videoRef.current?.pause();
-                setVideoPlaying(false);
-              } else {
-                videoRef.current?.play();
-                setVideoPlaying(true);
-              }
-            }}
+            // onClick={() => {
+            //   if (videoPlaying) {
+            //     videoRef.current?.pause();
+            //     setVideoPlaying(false);
+            //   } else {
+            //     videoRef.current?.play();
+            //     setVideoPlaying(true);
+            //   }
+            // }}
           >
             {!videoPlaying && (
               <div className="absolute top-0 left-0 bg-black/50 w-full h-full rounded-lg flex items-center justify-center">

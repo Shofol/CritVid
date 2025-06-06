@@ -39,7 +39,6 @@ const PlaybackTrackerPageFixed: React.FC = () => {
   const [drawActions, setDrawActions] = useState<DrawAction[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [videoUrl, setVideoUrl] = useState<string>("/video/dance.mp4");
-  const [isLoading, setIsLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -127,7 +126,7 @@ const PlaybackTrackerPageFixed: React.FC = () => {
   }
 
   return (
-    <AppLayout noHeader={true}>
+    <AppLayout>
       <div className="container mx-auto -mt-16">
         <PlaybackTrackerFixed
           videoUrl={videoUrl}

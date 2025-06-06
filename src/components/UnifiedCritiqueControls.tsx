@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Eye, Mic, Save, Square } from "lucide-react";
+import { Eye, Monitor, Save, Square } from "lucide-react";
 import React from "react";
 
 interface UnifiedCritiqueControlsProps {
@@ -74,8 +74,8 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
       {showPermissionWarning && (
         <Alert className="border-yellow-200 bg-yellow-50">
           <AlertDescription className="text-yellow-800">
-            🎤 Microphone access is required to record critiques. Please enable
-            microphone permissions and try again.
+            🎥 Screen recording access is required. Please enable screen
+            recording and microphone permissions and try again.
           </AlertDescription>
         </Alert>
       )}
@@ -87,8 +87,8 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
             Critique Studio
           </h1>
           <p className="text-gray-500 text-sm">
-            Record commentary and draw annotations while watching the video.{" "}
-            <br />
+            Record your screen with system audio + microphone and draw
+            annotations. <br />
             Use the unified controls to start/stop your critique session.
           </p>
         </div>
@@ -101,8 +101,8 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
               className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 px-4 py-3"
               size="sm"
             >
-              <Mic className="w-5 h-5" />
-              Start Recording
+              <Monitor className="w-5 h-5" />
+              Start Screen Recording
             </Button>
           ) : (
             <>
@@ -119,7 +119,7 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
               <div className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-800 rounded-lg border border-red-300">
                 <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                 <span className="text-sm font-semibold">
-                  🎤 Recording in Progress...
+                  🎥 Screen Recording in Progress...
                 </span>
               </div>
             </>

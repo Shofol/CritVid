@@ -115,6 +115,9 @@ const ViewCritique = React.lazy(() => import("@/pages/client/ViewCritique"));
 // Demo pages
 const EmailDemo = React.lazy(() => import("@/pages/EmailDemo"));
 const MuxVideoDemo = React.lazy(() => import("@/pages/MuxVideoDemo"));
+const ScreenRecordingDemo = React.lazy(
+  () => import("@/pages/ScreenRecordingDemo")
+);
 
 // Components - Keep auth components as static imports since they're critical
 import AuthDebugger from "@/components/auth/AuthDebugger";
@@ -308,6 +311,16 @@ function App() {
           <PublicRoute>
             <Suspense fallback={<PageLoader />}>
               <EmailDemo />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/screen-recording-demo"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ScreenRecordingDemo />
             </Suspense>
           </PublicRoute>
         }
