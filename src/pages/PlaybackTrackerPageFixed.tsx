@@ -38,7 +38,9 @@ const PlaybackTrackerPageFixed: React.FC = () => {
   const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
   const [drawActions, setDrawActions] = useState<DrawAction[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
-  const [videoUrl, setVideoUrl] = useState<string>("/video/dance.mp4");
+  const [videoUrl, setVideoUrl] = useState<string>(
+    "https://tasowytszirhdvdiwuia.supabase.co/storage/v1/object/sign/dance-critiques/dance.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81MjJmOGViYi1iNDllLTQzNTQtOTRhNi04YzQxMjk2ZWYzMGQiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkYW5jZS1jcml0aXF1ZXMvZGFuY2UubXA0IiwiaWF0IjoxNzQ5NDEwMDEzLCJleHAiOjE3ODA5NDYwMTN9.qu4MZU1Ocfft0Pc1kiP6GW-x83hnqfknWplpR3NS79g"
+  );
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
