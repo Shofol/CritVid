@@ -1,10 +1,16 @@
-import React, { useState, ReactNode } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import SocialLoginButton from './SocialLoginButton';
-import EmailSignInForm from './EmailSignInForm';
-import { supabase } from '@/lib/supabase';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { supabase } from "@/lib/supabase";
+import React, { ReactNode, useState } from "react";
+import EmailSignInForm from "./EmailSignInForm";
+import SocialLoginButton from "./SocialLoginButton";
 
 interface AuthCardProps {
   isSignUp?: boolean;
@@ -13,16 +19,16 @@ interface AuthCardProps {
   children?: ReactNode;
 }
 
-const AuthCard: React.FC<AuthCardProps> = ({ 
+const AuthCard: React.FC<AuthCardProps> = ({
   isSignUp: initialIsSignUp = false,
   title,
   description,
-  children 
+  children,
 }) => {
   const [isSignUp, setIsSignUp] = useState(initialIsSignUp);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSocialLogin = async (provider: 'google') => {
+  const handleSocialLogin = async (provider: "google") => {
     try {
       setIsLoading(true);
       await supabase.auth.signInWithOAuth({
@@ -32,7 +38,7 @@ const AuthCard: React.FC<AuthCardProps> = ({
         },
       });
     } catch (error) {
-      console.error('Social login error:', error);
+      console.error("Social login error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -42,12 +48,13 @@ const AuthCard: React.FC<AuthCardProps> = ({
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">
-          {title || (isSignUp ? 'Create an account' : 'Welcome back')}
+          {title || (isSignUp ? "Create an account" : "Welcome back")}
         </CardTitle>
         <CardDescription className="text-center">
-          {description || (isSignUp 
-            ? 'Sign up to start receiving professional dance critiques' 
-            : 'Sign in to your CritVid account')}
+          {description ||
+            (isSignUp
+              ? "Sign up to start receiving professional dance critiques"
+              : "Sign in to your CritVid account")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -56,9 +63,9 @@ const AuthCard: React.FC<AuthCardProps> = ({
         ) : (
           <>
             <div className="space-y-3">
-              <SocialLoginButton 
-                provider="google" 
-                onClick={() => handleSocialLogin('google')} 
+              <SocialLoginButton
+                provider="google"
+                onClick={() => handleSocialLogin("google")}
                 isLoading={isLoading}
               />
             </div>
@@ -74,22 +81,30 @@ const AuthCard: React.FC<AuthCardProps> = ({
               </div>
             </div>
 
-            <EmailSignInForm 
-              isSignUp={isSignUp} 
-              onToggleMode={() => setIsSignUp(!isSignUp)} 
+            <EmailSignInForm
+              isSignUp={isSignUp}
+              onToggleMode={() => setIsSignUp(!isSignUp)}
             />
           </>
         )}
       </CardContent>
       <CardFooter className="text-xs text-center text-muted-foreground">
-        By continuing, you agree to our{' '}
-        <a href="/terms" className="underline underline-offset-4 hover:text-primary">
+        By continuing, you agree to our{" "}
+        <a
+          href="/terms"
+          className="underline underline-offset-4 hover:text-primary pr-1"
+        >
           Terms of Service
-        </a>{' '}
-        and{' '}
-        <a href="/privacy" className="underline underline-offset-4 hover:text-primary">
+        </a>
+        {"  "}
+        and{"  "}
+        <a
+          href="/privacy"
+          className="underline underline-offset-4 hover:text-primary pl-1"
+        >
           Privacy Policy
-        </a>.
+        </a>
+        .
       </CardFooter>
     </Card>
   );

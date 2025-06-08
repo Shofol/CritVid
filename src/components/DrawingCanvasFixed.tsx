@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { safeArrayAccess } from '@/lib/utils';
+import { safeArrayAccess } from "@/lib/utils";
+import { Edit } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 interface DrawingCanvasProps {
   containerRef: React.RefObject<HTMLDivElement>;
   isActive: boolean;
   videoRef: React.RefObject<HTMLVideoElement>;
   isRecording: boolean;
-  onDrawAction?: (action: any) => void;
+  onDrawAction?: (action: DrawAction) => void;
 }
 
 interface DrawAction {
@@ -27,15 +27,18 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
   isActive,
   videoRef,
   isRecording,
-  onDrawAction
+  onDrawAction,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [currentPath, setCurrentPath] = useState<{ x: number; y: number }[]>([]);
+  const [currentPath, setCurrentPath] = useState<{ x: number; y: number }[]>(
+    []
+  );
   const [isDrawing, setIsDrawing] = useState(false);
-  const [drawColor, setDrawColor] = useState('#ff0000');
+  const [drawColor, setDrawColor] = useState("#ff0000");
   const [drawWidth, setDrawWidth] = useState(2);
   const [liveDrawings, setLiveDrawings] = useState<DrawAction[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 450 });
+  const [isControlsExpanded, setIsControlsExpanded] = useState(true);
   const cleanupRef = useRef<(() => void)[]>([]);
   const animationFrameRef = useRef<number | null>(null);
   const isDrawingRef = useRef(false);
@@ -45,16 +48,16 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
-    
-    cleanupRef.current.forEach(cleanup => {
+
+    cleanupRef.current.forEach((cleanup) => {
       try {
         cleanup();
       } catch (error) {
-        console.error('Drawing cleanup error:', error);
+        console.error("Drawing cleanup error:", error);
       }
     });
     cleanupRef.current = [];
-    
+
     setIsDrawing(false);
     setCurrentPath([]);
     isDrawingRef.current = false;
@@ -64,7 +67,7 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
     if (!isActive) {
       performCleanup();
     }
-    
+
     return () => {
       performCleanup();
     };
@@ -74,13 +77,13 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
     const container = containerRef.current;
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    
+
     if (!container || !canvas || !video) return;
-    
+
     const containerRect = container.getBoundingClientRect();
     const newWidth = containerRect.width;
     const newHeight = containerRect.height;
-    
+
     if (newWidth > 0 && newHeight > 0) {
       setCanvasSize({ width: newWidth, height: newHeight });
       canvas.width = newWidth;
@@ -95,17 +98,17 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
     if (video) {
       const handleLoadedMetadata = () => updateCanvasSize();
       const handleResize = () => updateCanvasSize();
-      
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
-      video.addEventListener('resize', handleResize);
-      window.addEventListener('resize', handleResize);
-      
+
+      video.addEventListener("loadedmetadata", handleLoadedMetadata);
+      video.addEventListener("resize", handleResize);
+      window.addEventListener("resize", handleResize);
+
       cleanupRef.current.push(() => {
-        video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        video.removeEventListener('resize', handleResize);
-        window.removeEventListener('resize', handleResize);
+        video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        video.removeEventListener("resize", handleResize);
+        window.removeEventListener("resize", handleResize);
       });
-      
+
       if (video.readyState >= 1) {
         updateCanvasSize();
       }
@@ -115,20 +118,20 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
   const renderLiveStroke = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
+
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     liveDrawings.forEach((drawing) => {
       if (drawing.path.length > 1) {
         ctx.globalAlpha = 1;
         ctx.strokeStyle = drawing.color;
         ctx.lineWidth = drawing.width;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
         ctx.beginPath();
         ctx.moveTo(drawing.path[0].x, drawing.path[0].y);
         for (let i = 1; i < drawing.path.length; i++) {
@@ -137,14 +140,14 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
         ctx.stroke();
       }
     });
-    
+
     if (currentPath.length > 0) {
       ctx.globalAlpha = 1;
       ctx.strokeStyle = drawColor;
       ctx.lineWidth = drawWidth;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
       ctx.beginPath();
       ctx.moveTo(currentPath[0].x, currentPath[0].y);
       for (let i = 1; i < currentPath.length; i++) {
@@ -158,7 +161,7 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
     const canvas = canvasRef.current;
     if (!canvas || !isActive) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const animate = () => {
@@ -189,13 +192,13 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.globalAlpha = 1;
-    
+
     let currentDrawPath: { x: number; y: number }[] = [];
 
     const getMousePos = (e: MouseEvent | TouchEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
       return {
         x: (clientX - rect.left) * (canvas.width / rect.width),
         y: (clientY - rect.top) * (canvas.height / rect.height),
@@ -204,7 +207,7 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
 
     const handleStart = (pos: { x: number; y: number }) => {
       if (!isActive || !isRecording) return;
-      
+
       isDrawingRef.current = true;
       setIsDrawing(true);
       currentDrawPath = [pos];
@@ -213,17 +216,23 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
 
     const handleMove = (pos: { x: number; y: number }) => {
       if (!isDrawingRef.current || !isActive || !isRecording) return;
-      
+
       currentDrawPath.push(pos);
       setCurrentPath(safeArrayAccess([...currentDrawPath]));
     };
 
     const handleEnd = () => {
-      if (!isDrawingRef.current || !videoRef.current || !isActive || !isRecording) return;
-      
+      if (
+        !isDrawingRef.current ||
+        !videoRef.current ||
+        !isActive ||
+        !isRecording
+      )
+        return;
+
       isDrawingRef.current = false;
       setIsDrawing(false);
-      
+
       if (currentDrawPath.length > 0) {
         const currentTime = videoRef.current.currentTime;
         const drawAction: DrawAction = {
@@ -231,22 +240,27 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
           timestamp: currentTime,
           startTime: currentTime,
           endTime: currentTime + DRAWING_FADE_DURATION,
-          color: drawColor || '#ff0000',
+          color: drawColor || "#ff0000",
           width: drawWidth || 2,
-          id: `draw_${Date.now()}_${Math.random()}`
+          id: `draw_${Date.now()}_${Math.random()}`,
         };
-        
-        console.log('✏️ Drawing action created:', drawAction);
-        
-        setLiveDrawings(prev => [...prev, drawAction]);
-        
+
+        console.log("✏️ Drawing action created:", drawAction);
+
+        setLiveDrawings((prev) => [...prev, drawAction]);
+
         if (onDrawAction) {
           onDrawAction(drawAction);
         }
-        
-        setTimeout(() => {
-          setLiveDrawings(prev => prev.filter(d => d.id !== drawAction.id));
-        }, DRAWING_FADE_DURATION * 1000 + 100);
+
+        setTimeout(
+          () => {
+            setLiveDrawings((prev) =>
+              prev.filter((d) => d.id !== drawAction.id)
+            );
+          },
+          DRAWING_FADE_DURATION * 1000 + 100
+        );
       }
       setCurrentPath([]);
     };
@@ -255,7 +269,7 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
       e.preventDefault();
       handleStart(getMousePos(e));
     };
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       e.preventDefault();
       handleMove(getMousePos(e));
@@ -270,7 +284,7 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
       e.preventDefault();
       handleStart(getMousePos(e));
     };
-    
+
     const handleTouchMove = (e: TouchEvent) => {
       e.preventDefault();
       handleMove(getMousePos(e));
@@ -302,16 +316,16 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
     }
   }, [drawColor, drawWidth, isActive, isRecording, videoRef, onDrawAction]);
 
-  const handleClearCanvasVisual = () => {
-    setLiveDrawings([]);
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    }
-  };
+  // const handleClearCanvasVisual = () => {
+  //   setLiveDrawings([]);
+  //   const canvas = canvasRef.current;
+  //   if (canvas) {
+  //     const ctx = canvas.getContext("2d");
+  //     if (ctx) {
+  //       ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //     }
+  //   }
+  // };
 
   if (!isActive) {
     return null;
@@ -323,58 +337,76 @@ const DrawingCanvasFixed: React.FC<DrawingCanvasProps> = ({
         ref={canvasRef}
         width={canvasSize.width}
         height={canvasSize.height}
-        className={`absolute top-0 left-0 ${isActive && isRecording ? 'cursor-crosshair' : 'pointer-events-none'}`}
-        style={{ 
-          pointerEvents: isActive && isRecording ? 'auto' : 'none',
-          width: '100%',
-          height: '100%',
-          touchAction: 'none',
+        className={`absolute z-10 top-0 left-0 ${isActive && isRecording ? "cursor-crosshair" : "pointer-events-none"}`}
+        style={{
+          pointerEvents: isActive && isRecording ? "auto" : "none",
+          width: "100%",
+          height: "100%",
+          touchAction: "none",
           zIndex: isActive ? 10 : 1,
           opacity: 1,
-          backgroundColor: 'transparent'
+          backgroundColor: "transparent",
         }}
       />
-      
+
       {isActive && isRecording && (
-        <div className="absolute bottom-4 left-4 bg-white p-3 rounded-lg shadow-lg border space-y-2 z-20">
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-medium">Color:</label>
-            <input
-              type="color"
-              value={drawColor || '#ff0000'}
-              onChange={(e) => setDrawColor(e.target.value)}
-              className="w-8 h-6 rounded border"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-medium">Width:</label>
-            <input
-              type="range"
-              min="1"
-              max="10"
-              value={drawWidth || 2}
-              onChange={(e) => setDrawWidth(Number(e.target.value))}
-              className="w-16"
-            />
-            <span className="text-xs">{drawWidth || 2}px</span>
-          </div>
-          <Button
-            onClick={handleClearCanvasVisual}
-            size="sm"
-            variant="outline"
-            className="w-full text-xs"
-          >
-            Clear Canvas
-          </Button>
-          {isDrawing && (
-            <div className="text-xs text-blue-600 font-medium">
-              ✏️ Drawing... ({currentPath.length} points)
+        <>
+          {isControlsExpanded ? (
+            <div className="absolute top-20 right-4 bg-white p-3 rounded-sm shadow-lg border space-y-2 z-20">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-gray-700">
+                  Drawing Controls
+                </span>
+                <button
+                  onClick={() => setIsControlsExpanded(false)}
+                  className="text-gray-400 hover:text-gray-600 p-1"
+                  title="Minimize controls"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium">Color:</label>
+                <input
+                  type="color"
+                  value={drawColor || "#ff0000"}
+                  onChange={(e) => setDrawColor(e.target.value)}
+                  className="w-8 h-6 rounded border"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium">Width:</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={drawWidth || 2}
+                  onChange={(e) => setDrawWidth(Number(e.target.value))}
+                  className="w-16"
+                />
+                <span className="text-xs">{drawWidth || 2}px</span>
+              </div>
             </div>
+          ) : (
+            <button
+              onClick={() => setIsControlsExpanded(true)}
+              className="absolute top-20 right-4 p-0 h-10 w-10 flex items-center justify-center bg-white rounded-full shadow-lg border hover:bg-gray-50 z-20"
+              title="Open drawing controls"
+            >
+              <Edit className="h-4 w-4" />
+            </button>
           )}
-          <div className="text-xs text-green-600">
-            🎨 Live: {liveDrawings.length} drawings
-          </div>
-        </div>
+        </>
       )}
     </>
   );

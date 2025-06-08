@@ -1,79 +1,97 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import AppLayout from '@/components/AppLayout';
-import PlaybackPreviewPlayer from '@/components/PlaybackPreviewPlayer';
-import CritiqueFeedbackPanel from '@/components/CritiqueFeedbackPanel';
-import PaymentStatusBar from '@/components/client/PaymentStatusBar';
-import CritiquePaymentActions from '@/components/client/CritiquePaymentActions';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Download, Share2 } from 'lucide-react';
-import { CritiquePaymentStatus } from '@/lib/paymentService';
+import AppLayout from "@/components/AppLayout";
+import CritiqueFeedbackPanel from "@/components/CritiqueFeedbackPanel";
+import PlaybackPreviewPlayer from "@/components/PlaybackPreviewPlayer";
+import CritiquePaymentActions from "@/components/client/CritiquePaymentActions";
+import PaymentStatusBar from "@/components/client/PaymentStatusBar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CritiquePaymentStatus } from "@/lib/paymentService";
+import { ArrowLeft, Download, Share2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface TimelineEvent {
   timestamp: number;
-  type: 'pause' | 'play' | 'drawing';
+  type: "pause" | "play" | "drawing";
   duration?: number;
   data?: any;
+}
+
+interface CritiqueSession {
+  videoUrl: string;
+  recordedVideoUrl: string | null;
+  drawActions: any[];
+  videoActions: any[];
+  timelineEvents: TimelineEvent[];
+  createdAt: string;
+  id: string;
 }
 
 const CritiquePreview: React.FC = () => {
   const { videoId } = useParams();
   const navigate = useNavigate();
-  
-  const [videoUrl, setVideoUrl] = useState<string>('');
-  const [audioUrl, setAudioUrl] = useState<string>('');
+
+  const [videoUrl, setVideoUrl] = useState<string>("");
+  const [audioUrl, setAudioUrl] = useState<string>("");
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [drawActions, setDrawActions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<CritiquePaymentStatus | null>(null);
+  const [paymentStatus, setPaymentStatus] =
+    useState<CritiquePaymentStatus | null>(null);
 
-  // Mock data for demonstration
+  // Load critique data from localStorage
   useEffect(() => {
     const loadCritiqueData = async () => {
       try {
         setIsLoading(true);
-        
-        // Simulate API call to load critique data
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data
-        setVideoUrl('https://www.w3schools.com/html/mov_bbb.mp4');
-        setAudioUrl('https://www.soundjay.com/misc/sounds/bell-ringing-05.wav');
-        
-        setTimelineEvents([
-          { timestamp: 10, type: 'pause', duration: 3 },
-          { timestamp: 25, type: 'pause', duration: 2 },
-          { timestamp: 40, type: 'pause', duration: 4 }
-        ]);
-        
-        setDrawActions([
-          {
-            timestamp: 12,
-            type: 'draw',
-            points: [{ x: 100, y: 100 }, { x: 150, y: 150 }],
-            style: { color: 'red', lineWidth: 3 }
-          },
-          {
-            timestamp: 27,
-            type: 'draw', 
-            points: [{ x: 200, y: 200 }, { x: 250, y: 180 }],
-            style: { color: 'blue', lineWidth: 2 }
-          }
-        ]);
-        
-        // Mock payment status - change to 'approved' to test approved state
+
+        // Load critique session from localStorage
+        const critiqueKey = `critique_draft_${videoId || "demo"}`;
+        const savedCritique = localStorage.getItem(critiqueKey);
+
+        if (savedCritique) {
+          const session: CritiqueSession = JSON.parse(savedCritique);
+          console.log("📂 Loaded critique session:", session);
+
+          // Use the recorded screen video if available, otherwise fall back to original video
+          setVideoUrl(
+            session.recordedVideoUrl ||
+              session.videoUrl ||
+              "https://www.w3schools.com/html/mov_bbb.mp4"
+          );
+
+          // For screen recordings, we don't need separate audio since it's embedded in the video
+          setAudioUrl(session.recordedVideoUrl ? "" : "");
+
+          setTimelineEvents(session.timelineEvents || []);
+          setDrawActions(session.drawActions || []);
+
+          console.log("✅ Critique data loaded:", {
+            hasRecordedVideo: !!session.recordedVideoUrl,
+            videoUrl: session.recordedVideoUrl || session.videoUrl,
+            drawActions: session.drawActions?.length || 0,
+            timelineEvents: session.timelineEvents?.length || 0,
+          });
+        } else {
+          // Fallback to mock data if no saved critique found
+          console.log("⚠️ No saved critique found, using fallback");
+          setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
+          setAudioUrl("");
+          setTimelineEvents([]);
+          setDrawActions([]);
+        }
+
+        // Mock payment status
         setPaymentStatus({
           id: `critique-${videoId}`,
-          payment_status: 'pending_approval',
+          payment_status: "pending_approval",
           auto_approved: false,
-          disputed: false
+          disputed: false,
         });
-        
       } catch (err) {
-        setError('Failed to load critique data');
-        console.error('Error loading critique:', err);
+        setError("Failed to load critique data");
+        console.error("Error loading critique:", err);
       } finally {
         setIsLoading(false);
       }
@@ -87,19 +105,34 @@ const CritiquePreview: React.FC = () => {
   };
 
   const handleDownload = () => {
-    console.log('Download critique');
+    if (videoUrl && videoUrl.startsWith("blob:")) {
+      // Download screen recording
+      const a = document.createElement("a");
+      a.href = videoUrl;
+      a.download = `critique-screen-recording-${videoId || "demo"}-${Date.now()}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      console.log("📥 Downloaded screen recording");
+    } else {
+      console.log("Download critique");
+    }
   };
 
   const handleShare = () => {
-    console.log('Share critique');
+    console.log("Share critique");
   };
 
   const handlePaymentApproval = () => {
-    setPaymentStatus(prev => prev ? {
-      ...prev,
-      payment_status: 'approved',
-      payment_released_at: new Date().toISOString()
-    } : null);
+    setPaymentStatus((prev) =>
+      prev
+        ? {
+            ...prev,
+            payment_status: "approved",
+            payment_released_at: new Date().toISOString(),
+          }
+        : null
+    );
   };
 
   if (isLoading) {
@@ -133,7 +166,7 @@ const CritiquePreview: React.FC = () => {
     );
   }
 
-  const isPending = paymentStatus?.payment_status === 'pending_approval';
+  const isPending = paymentStatus?.payment_status === "pending_approval";
 
   return (
     <AppLayout>
@@ -147,10 +180,10 @@ const CritiquePreview: React.FC = () => {
             </Button>
             <div>
               <h1 className="text-2xl font-bold">Critique Preview</h1>
-              <p className="text-gray-600">Video ID: {videoId || 'demo'}</p>
+              <p className="text-gray-600">Video ID: {videoId || "demo"}</p>
             </div>
           </div>
-          
+
           <div className="flex gap-2">
             <Button onClick={handleShare} variant="outline" size="sm">
               <Share2 className="w-4 h-4 mr-2" />
@@ -165,10 +198,10 @@ const CritiquePreview: React.FC = () => {
 
         {/* Payment Status Bar */}
         <PaymentStatusBar paymentStatus={paymentStatus} />
-        
+
         {/* Payment Action Buttons */}
         {isPending && (
-          <CritiquePaymentActions 
+          <CritiquePaymentActions
             critiqueId={`critique-${videoId}`}
             onApproval={handlePaymentApproval}
           />
@@ -177,7 +210,14 @@ const CritiquePreview: React.FC = () => {
         {/* Video Player */}
         <Card>
           <CardHeader>
-            <CardTitle>Critique Playback</CardTitle>
+            <CardTitle>
+              Critique Playback
+              {videoUrl && videoUrl.startsWith("blob:") && (
+                <span className="ml-2 text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                  🎥 Screen Recording
+                </span>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <PlaybackPreviewPlayer
@@ -186,6 +226,15 @@ const CritiquePreview: React.FC = () => {
               timelineEvents={timelineEvents}
               drawActions={drawActions}
             />
+            {videoUrl && videoUrl.startsWith("blob:") && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  📹 This critique includes a screen recording with synchronized
+                  audio (system + microphone). All interactions and commentary
+                  have been captured for comprehensive review.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

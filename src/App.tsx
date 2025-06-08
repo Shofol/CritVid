@@ -1,192 +1,918 @@
-import { Routes, Route } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
+import React, { Suspense } from "react";
+import { Route, Routes } from "react-router-dom";
 
-// Pages
-import Index from '@/pages/Index';
-import Dashboard from '@/pages/Dashboard';
-import NotFound from '@/pages/NotFound';
-import Login from '@/pages/Login';
-import Signup from '@/pages/Signup';
-import AuthCallback from '@/pages/AuthCallback';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
-import Help from '@/pages/Help';
-import UserDashboard from '@/pages/UserDashboard';
-import FindAdjudicator from '@/pages/FindAdjudicator';
-import VideoLibrary from '@/pages/VideoLibrary';
-import UploadVideo from '@/pages/UploadVideo';
-import Profile from '@/pages/Profile';
-import RoleSelection from '@/pages/RoleSelection';
-import DashboardSelector from '@/pages/DashboardSelector';
-import EmailVerification from '@/pages/EmailVerification';
-import PrivateCritique from '@/pages/PrivateCritique';
-import Contact from '@/pages/Contact';
-import Guidelines from '@/pages/Guidelines';
-import Privacy from '@/pages/Privacy';
-import Terms from '@/pages/Terms';
-import Reviews from '@/pages/Reviews';
-import PlaybackTrackerPageFixed from '@/pages/PlaybackTrackerPageFixed';
-import ConnectionTestPage from '@/pages/ConnectionTest';
-import CritiquePreview from '@/pages/CritiquePreview';
-import Checkout from '@/pages/Checkout';
-import ThankYou from '@/pages/ThankYou';
-import VideoPlayer from '@/pages/VideoPlayer';
+// Convert all page imports to dynamic imports using React.lazy()
+const AuthCallback = React.lazy(() => import("@/pages/AuthCallback"));
+const Checkout = React.lazy(() => import("@/pages/Checkout"));
+const ConnectionTestPage = React.lazy(() => import("@/pages/ConnectionTest"));
+const Contact = React.lazy(() => import("@/pages/Contact"));
+const CritiquePreview = React.lazy(() => import("@/pages/CritiquePreview"));
+const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
+const DashboardSelector = React.lazy(() => import("@/pages/DashboardSelector"));
+const EmailVerification = React.lazy(() => import("@/pages/EmailVerification"));
+const FindAdjudicator = React.lazy(() => import("@/pages/FindAdjudicator"));
+const ForgotPassword = React.lazy(() => import("@/pages/ForgotPassword"));
+const Guidelines = React.lazy(() => import("@/pages/Guidelines"));
+const Help = React.lazy(() => import("@/pages/Help"));
+const Index = React.lazy(() => import("@/pages/Index"));
+const Login = React.lazy(() => import("@/pages/Login"));
+const NotFound = React.lazy(() => import("@/pages/NotFound"));
+const PlaybackTrackerPageFixed = React.lazy(
+  () => import("@/pages/PlaybackTrackerPageFixed")
+);
+const Privacy = React.lazy(() => import("@/pages/Privacy"));
+const PrivateCritique = React.lazy(() => import("@/pages/PrivateCritique"));
+const Profile = React.lazy(() => import("@/pages/Profile"));
+const ResetPassword = React.lazy(() => import("@/pages/ResetPassword"));
+const Reviews = React.lazy(() => import("@/pages/Reviews"));
+const RoleSelection = React.lazy(() => import("@/pages/RoleSelection"));
+const Signup = React.lazy(() => import("@/pages/Signup"));
+const Terms = React.lazy(() => import("@/pages/Terms"));
+const ThankYou = React.lazy(() => import("@/pages/ThankYou"));
+const UploadVideo = React.lazy(() => import("@/pages/UploadVideo"));
+const UserDashboard = React.lazy(() => import("@/pages/UserDashboard"));
+const VideoLibrary = React.lazy(() => import("@/pages/VideoLibrary"));
+const VideoPlayer = React.lazy(() => import("@/pages/VideoPlayer"));
 
 // Admin pages
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import UserManagement from '@/pages/admin/UserManagement';
-import AdjudicatorAdmin from '@/pages/admin/AdjudicatorAdmin';
-import EmailTemplatesPage from '@/pages/admin/EmailTemplatesPage';
-import TestEmailPage from '@/pages/admin/TestEmailPage';
-import VideoReviewsPage from '@/pages/admin/VideoReviewsPage';
-import VideoReviewPage from '@/pages/admin/VideoReviewPage';
-import StatsPage from '@/pages/admin/StatsPage';
-import SettingsPage from '@/pages/admin/SettingsPage';
-import ClientManagementPage from '@/pages/admin/ClientManagementPage';
-import StudioOwners from '@/pages/admin/StudioOwners';
-import SystemSettings from '@/pages/admin/SystemSettings';
-import PaymentReports from '@/pages/admin/PaymentReports';
-import AutomationPage from '@/pages/admin/AutomationPage';
-import StorageManagement from '@/pages/admin/StorageManagement';
-import ReviewManagementPage from '@/pages/admin/ReviewManagementPage';
+const AdjudicatorAdmin = React.lazy(
+  () => import("@/pages/admin/AdjudicatorAdmin")
+);
+const AdminDashboard = React.lazy(() => import("@/pages/admin/AdminDashboard"));
+const AutomationPage = React.lazy(() => import("@/pages/admin/AutomationPage"));
+const ClientManagementPage = React.lazy(
+  () => import("@/pages/admin/ClientManagementPage")
+);
+const EmailTemplatesPage = React.lazy(
+  () => import("@/pages/admin/EmailTemplatesPage")
+);
+const PaymentReports = React.lazy(() => import("@/pages/admin/PaymentReports"));
+const ReviewManagementPage = React.lazy(
+  () => import("@/pages/admin/ReviewManagementPage")
+);
+const SettingsPage = React.lazy(() => import("@/pages/admin/SettingsPage"));
+const StatsPage = React.lazy(() => import("@/pages/admin/StatsPage"));
+const StorageManagement = React.lazy(
+  () => import("@/pages/admin/StorageManagement")
+);
+const StudioOwners = React.lazy(() => import("@/pages/admin/StudioOwners"));
+const SystemSettings = React.lazy(() => import("@/pages/admin/SystemSettings"));
+const TestEmailPage = React.lazy(() => import("@/pages/admin/TestEmailPage"));
+const UserManagement = React.lazy(() => import("@/pages/admin/UserManagement"));
+const VideoReviewPage = React.lazy(
+  () => import("@/pages/admin/VideoReviewPage")
+);
+const VideoReviewsPage = React.lazy(
+  () => import("@/pages/admin/VideoReviewsPage")
+);
 
 // Adjudicator pages
-import AdjudicatorDashboard from '@/pages/adjudicator/Dashboard';
-import PendingCritiques from '@/pages/adjudicator/PendingCritiques';
-import CompletedCritiques from '@/pages/adjudicator/CompletedCritiques';
-import AdjudicatorPayments from '@/pages/adjudicator/Payments';
-import ProfileEditor from '@/pages/adjudicator/ProfileEditor';
-import ApplicationStatus from '@/pages/adjudicator/ApplicationStatus';
-import Apply from '@/pages/adjudicator/Apply';
-import AdjudicatorSupport from '@/pages/adjudicator/Support';
+const ApplicationStatus = React.lazy(
+  () => import("@/pages/adjudicator/ApplicationStatus")
+);
+const Apply = React.lazy(() => import("@/pages/adjudicator/Apply"));
+const CompletedCritiques = React.lazy(
+  () => import("@/pages/adjudicator/CompletedCritiques")
+);
+const AdjudicatorDashboard = React.lazy(
+  () => import("@/pages/adjudicator/Dashboard")
+);
+const AdjudicatorPayments = React.lazy(
+  () => import("@/pages/adjudicator/Payments")
+);
+const PendingCritiques = React.lazy(
+  () => import("@/pages/adjudicator/PendingCritiques")
+);
+const ProfileEditor = React.lazy(
+  () => import("@/pages/adjudicator/ProfileEditor")
+);
+const AdjudicatorSupport = React.lazy(
+  () => import("@/pages/adjudicator/Support")
+);
 
 // Studio pages
-import StudioDashboard from '@/pages/studio/Dashboard';
-import SavedCritiques from '@/pages/studio/SavedCritiques';
-import TeamManagement from '@/pages/studio/TeamManagement';
+const StudioDashboard = React.lazy(() => import("@/pages/studio/Dashboard"));
+const SavedCritiques = React.lazy(
+  () => import("@/pages/studio/SavedCritiques")
+);
+const TeamManagement = React.lazy(
+  () => import("@/pages/studio/TeamManagement")
+);
 
 // Client pages
-import ClientDashboard from '@/pages/client/ClientDashboard';
-import PaymentHistory from '@/pages/client/PaymentHistory';
-import PaymentMethods from '@/pages/client/PaymentMethods';
-import Billing from '@/pages/client/Billing';
-import ViewCritique from '@/pages/client/ViewCritique';
+const Billing = React.lazy(() => import("@/pages/client/Billing"));
+const ClientDashboard = React.lazy(
+  () => import("@/pages/client/ClientDashboard")
+);
+const PaymentHistory = React.lazy(
+  () => import("@/pages/client/PaymentHistory")
+);
+const PaymentMethods = React.lazy(
+  () => import("@/pages/client/PaymentMethods")
+);
+const ViewCritique = React.lazy(() => import("@/pages/client/ViewCritique"));
 
 // Demo pages
-import MuxVideoDemo from '@/pages/MuxVideoDemo';
-import EmailDemo from '@/pages/EmailDemo';
-import JavaEmailDemo from '@/pages/admin/JavaEmailDemo';
-import SendGridJavaDemo from '@/pages/admin/SendGridJavaDemo';
+const EmailDemo = React.lazy(() => import("@/pages/EmailDemo"));
+const MuxVideoDemo = React.lazy(() => import("@/pages/MuxVideoDemo"));
+const ScreenRecordingDemo = React.lazy(
+  () => import("@/pages/ScreenRecordingDemo")
+);
 
-// Components
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import PublicRoute from '@/components/auth/PublicRoute';
-import AuthDebugger from '@/components/auth/AuthDebugger';
+// Components - Keep auth components as static imports since they're critical
+import AuthDebugger from "@/components/auth/AuthDebugger";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import PublicRoute from "@/components/auth/PublicRoute";
+
+// Loading component for better UX
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-black text-white">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <p className="text-gray-300">Loading...</p>
+    </div>
+  </div>
+);
 
 function App() {
   return (
     <Routes>
       {/* Temporary debug route */}
       <Route path="/debug" element={<AuthDebugger />} />
-      
+
       {/* Public routes - accessible without authentication */}
-      <Route path="/" element={<PublicRoute><Index /></PublicRoute>} />
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-      <Route path="/auth/callback" element={<PublicRoute><AuthCallback /></PublicRoute>} />
-      <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-      <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
-      <Route path="/help" element={<PublicRoute><Help /></PublicRoute>} />
-      <Route path="/reviews" element={<PublicRoute><Reviews /></PublicRoute>} />
-      <Route path="/contact" element={<PublicRoute><Contact /></PublicRoute>} />
-      <Route path="/guidelines" element={<PublicRoute><Guidelines /></PublicRoute>} />
-      <Route path="/privacy" element={<PublicRoute><Privacy /></PublicRoute>} />
-      <Route path="/terms" element={<PublicRoute><Terms /></PublicRoute>} />
-      <Route path="/verify-email" element={<PublicRoute><EmailVerification /></PublicRoute>} />
-      
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Index />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Login />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Signup />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/callback"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AuthCallback />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ForgotPassword />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ResetPassword />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/help"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Help />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/email-verification"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <EmailVerification />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/reviews"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Reviews />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/contact"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Contact />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/guidelines"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Guidelines />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/privacy"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Privacy />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Terms />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/verify-email"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <EmailVerification />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+
       {/* Connection Test Route - public for testing */}
-      <Route path="/connection-test" element={<PublicRoute><ConnectionTestPage /></PublicRoute>} />
-      
+      <Route
+        path="/connection-test"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ConnectionTestPage />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+
       {/* Demo routes - public */}
-      <Route path="/mux-demo" element={<PublicRoute><MuxVideoDemo /></PublicRoute>} />
-      <Route path="/email-demo" element={<PublicRoute><EmailDemo /></PublicRoute>} />
+      <Route
+        path="/mux-demo"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <MuxVideoDemo />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/email-demo"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <EmailDemo />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/screen-recording-demo"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ScreenRecordingDemo />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
 
       {/* All other routes require authentication */}
-      <Route path="/find-adjudicator" element={<ProtectedRoute><FindAdjudicator /></ProtectedRoute>} />
-      <Route path="/find-adjudicator/:id" element={<ProtectedRoute><FindAdjudicator /></ProtectedRoute>} />
-      
+      <Route
+        path="/find-adjudicator"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <FindAdjudicator />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/find-adjudicator/:id"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <FindAdjudicator />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Checkout and Thank You routes */}
-      <Route path="/checkout/:videoId/:adjudicatorId" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-      <Route path="/thank-you" element={<ProtectedRoute><ThankYou /></ProtectedRoute>} />
-      
+      <Route
+        path="/checkout/:videoId/:adjudicatorId"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Checkout />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/thank-you"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ThankYou />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+
       {/* VIDEO ROUTES */}
-      <Route path="/video/:id" element={<ProtectedRoute><CritiquePreview /></ProtectedRoute>} />
-      <Route path="/video-player/:id" element={<ProtectedRoute><VideoPlayer /></ProtectedRoute>} />
-      <Route path="/critique/:id" element={<ProtectedRoute><CritiquePreview /></ProtectedRoute>} />
-      <Route path="/critique-editor/:videoId" element={<ProtectedRoute><PlaybackTrackerPageFixed /></ProtectedRoute>} />
-      <Route path="/critique-editor" element={<ProtectedRoute><PlaybackTrackerPageFixed /></ProtectedRoute>} />
-      <Route path="/edit-video/:videoId" element={<ProtectedRoute><PlaybackTrackerPageFixed /></ProtectedRoute>} />
-      <Route path="/video-editor/:videoId" element={<ProtectedRoute><PlaybackTrackerPageFixed /></ProtectedRoute>} />
-      <Route path="/video-editor" element={<ProtectedRoute><PlaybackTrackerPageFixed /></ProtectedRoute>} />
-      <Route path="/playback-tracker/:videoId" element={<ProtectedRoute><PlaybackTrackerPageFixed /></ProtectedRoute>} />
-      <Route path="/playback-tracker" element={<ProtectedRoute><PlaybackTrackerPageFixed /></ProtectedRoute>} />
-      <Route path="/critique-preview/:videoId" element={<ProtectedRoute><CritiquePreview /></ProtectedRoute>} />
-      
+      <Route
+        path="/video/:id"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <CritiquePreview />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/video-player/:id"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <VideoPlayer />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/critique/:id"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <CritiquePreview />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/critique-editor/:videoId"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/critique-editor"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/edit-video/:videoId"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/video-editor/:videoId"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/video-editor"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/playback-tracker/:videoId"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/playback-tracker"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/critique-preview/:videoId"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <CritiquePreview />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Protected routes */}
-      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/user-dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
-      <Route path="/video-library" element={<ProtectedRoute><VideoLibrary /></ProtectedRoute>} />
-      <Route path="/upload-video" element={<ProtectedRoute><UploadVideo /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/role-selection" element={<ProtectedRoute><RoleSelection /></ProtectedRoute>} />
-      <Route path="/dashboard-selector" element={<ProtectedRoute><DashboardSelector /></ProtectedRoute>} />
-      <Route path="/private-critique" element={<ProtectedRoute><PrivateCritique /></ProtectedRoute>} />
-      
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Dashboard />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user-dashboard"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <UserDashboard />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/video-library"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <VideoLibrary />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/upload-video"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <UploadVideo />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Profile />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/role-selection"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <RoleSelection />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard-selector"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <DashboardSelector />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/private-critique"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PrivateCritique />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Admin routes */}
-      <Route path="/admin/dashboard" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute adminOnly><UserManagement /></ProtectedRoute>} />
-      <Route path="/admin/adjudicators" element={<ProtectedRoute adminOnly><AdjudicatorAdmin /></ProtectedRoute>} />
-      <Route path="/admin/reviews" element={<ProtectedRoute adminOnly><ReviewManagementPage /></ProtectedRoute>} />
-      <Route path="/admin/email-templates" element={<ProtectedRoute adminOnly><EmailTemplatesPage /></ProtectedRoute>} />
-      <Route path="/admin/test-email" element={<ProtectedRoute adminOnly><TestEmailPage /></ProtectedRoute>} />
-      <Route path="/admin/video-reviews" element={<ProtectedRoute adminOnly><VideoReviewsPage /></ProtectedRoute>} />
-      <Route path="/admin/video-review/:id" element={<ProtectedRoute adminOnly><VideoReviewPage /></ProtectedRoute>} />
-      <Route path="/admin/stats" element={<ProtectedRoute adminOnly><StatsPage /></ProtectedRoute>} />
-      <Route path="/admin/settings" element={<ProtectedRoute adminOnly><SettingsPage /></ProtectedRoute>} />
-      <Route path="/admin/clients" element={<ProtectedRoute adminOnly><ClientManagementPage /></ProtectedRoute>} />
-      <Route path="/admin/studio-owners" element={<ProtectedRoute adminOnly><StudioOwners /></ProtectedRoute>} />
-      <Route path="/admin/system" element={<ProtectedRoute adminOnly><SystemSettings /></ProtectedRoute>} />
-      <Route path="/admin/payments" element={<ProtectedRoute adminOnly><PaymentReports /></ProtectedRoute>} />
-      <Route path="/admin/automation" element={<ProtectedRoute adminOnly><AutomationPage /></ProtectedRoute>} />
-      <Route path="/admin/storage" element={<ProtectedRoute adminOnly><StorageManagement /></ProtectedRoute>} />
-      <Route path="/admin/java-email-demo" element={<ProtectedRoute adminOnly><JavaEmailDemo /></ProtectedRoute>} />
-      <Route path="/admin/sendgrid-java-demo" element={<ProtectedRoute adminOnly><SendGridJavaDemo /></ProtectedRoute>} />
-      
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <AdminDashboard />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <UserManagement />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/adjudicators"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <AdjudicatorAdmin />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reviews"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <ReviewManagementPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/email-templates"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <EmailTemplatesPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/test-email"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <TestEmailPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/video-reviews"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <VideoReviewsPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/video-review/:id"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <VideoReviewPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/stats"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <StatsPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <SettingsPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/clients"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <ClientManagementPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/studio-owners"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <StudioOwners />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/system"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <SystemSettings />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/payments"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <PaymentReports />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/automation"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <AutomationPage />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/storage"
+        element={
+          <ProtectedRoute adminOnly>
+            <Suspense fallback={<PageLoader />}>
+              <StorageManagement />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Adjudicator routes */}
-      <Route path="/adjudicator/dashboard" element={<ProtectedRoute><AdjudicatorDashboard /></ProtectedRoute>} />
-      <Route path="/adjudicator/pending-critiques" element={<ProtectedRoute><PendingCritiques /></ProtectedRoute>} />
-      <Route path="/adjudicator/completed-critiques" element={<ProtectedRoute><CompletedCritiques /></ProtectedRoute>} />
-      <Route path="/adjudicator/payments" element={<ProtectedRoute><AdjudicatorPayments /></ProtectedRoute>} />
-      <Route path="/adjudicator/critique-editor/:id" element={<ProtectedRoute><PlaybackTrackerPageFixed /></ProtectedRoute>} />
-      <Route path="/adjudicator/profile" element={<ProtectedRoute><ProfileEditor /></ProtectedRoute>} />
-      <Route path="/adjudicator/application-status" element={<ProtectedRoute><ApplicationStatus /></ProtectedRoute>} />
-      <Route path="/adjudicator/apply" element={<ProtectedRoute><Apply /></ProtectedRoute>} />
-      <Route path="/adjudicator/support" element={<ProtectedRoute><AdjudicatorSupport /></ProtectedRoute>} />
-      
+      <Route
+        path="/adjudicator/dashboard"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdjudicatorDashboard />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/pending-critiques"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PendingCritiques />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/completed-critiques"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <CompletedCritiques />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/payments"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdjudicatorPayments />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/critique-editor/:id"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PlaybackTrackerPageFixed />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/profile"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProfileEditor />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/application-status"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ApplicationStatus />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/apply"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Apply />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/support"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <AdjudicatorSupport />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Studio routes */}
-      <Route path="/studio/dashboard" element={<ProtectedRoute studioOnly><StudioDashboard /></ProtectedRoute>} />
-      <Route path="/studio/saved-critiques" element={<ProtectedRoute studioOnly><SavedCritiques /></ProtectedRoute>} />
-      <Route path="/studio/team" element={<ProtectedRoute studioOnly><TeamManagement /></ProtectedRoute>} />
-      
+      <Route
+        path="/studio/dashboard"
+        element={
+          <ProtectedRoute studioOnly>
+            <Suspense fallback={<PageLoader />}>
+              <StudioDashboard />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/studio/saved-critiques"
+        element={
+          <ProtectedRoute studioOnly>
+            <Suspense fallback={<PageLoader />}>
+              <SavedCritiques />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/studio/team"
+        element={
+          <ProtectedRoute studioOnly>
+            <Suspense fallback={<PageLoader />}>
+              <TeamManagement />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+
       {/* Client routes */}
-      <Route path="/client/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
-      <Route path="/client/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
-      <Route path="/client/payment-history" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
-      <Route path="/client/payment-methods" element={<ProtectedRoute><PaymentMethods /></ProtectedRoute>} />
-      <Route path="/client/view-critique/:critiqueId" element={<ProtectedRoute><ViewCritique /></ProtectedRoute>} />
-      
+      <Route
+        path="/client/dashboard"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ClientDashboard />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/client/billing"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Billing />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/client/payment-history"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PaymentHistory />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/client/payment-methods"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <PaymentMethods />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/client/view-critique/:critiqueId"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ViewCritique />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+
       {/* 404 route */}
-      <Route path="*" element={<PublicRoute><NotFound /></PublicRoute>} />
+      <Route
+        path="*"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<PageLoader />}>
+              <NotFound />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
     </Routes>
   );
 }
