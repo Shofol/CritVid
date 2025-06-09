@@ -12,7 +12,6 @@ interface PlaybackTrackerProps {
   drawActions: any[];
   setDrawActions: (actions: any[]) => void;
   videoRef: React.RefObject<HTMLVideoElement>;
-  onPreviewCritique: () => void;
 }
 
 const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
@@ -21,23 +20,21 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
   drawActions,
   setDrawActions,
   videoRef,
-  onPreviewCritique,
 }) => {
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [isPlaybackMode, setIsPlaybackMode] = useState(false);
 
   const {
     isRecording,
     recordedVideoUrl,
     hasRecordedData,
-    isSaving,
     permissionStatus,
     errorMessage,
     startCritique,
     stopCritique,
-    saveDraft,
     setDrawActions: addDrawAction,
     handleVideoAction,
   } = useUnifiedCritiqueScreenRecording(videoRef, videoUrl);
@@ -49,7 +46,28 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
   }, [recordedVideoUrl, setRecordedAudioUrl]);
 
   const effectiveVideoUrl =
-    videoUrl || "https://www.w3schools.com/html/mov_bbb.mp4";
+    isPlaybackMode && recordedVideoUrl
+      ? recordedVideoUrl
+      : videoUrl || "https://www.w3schools.com/html/mov_bbb.mp4";
+
+  const handlePlayRecording = () => {
+    if (recordedVideoUrl) {
+      console.log(
+        "🎬 Switching to playback mode with recorded video:",
+        recordedVideoUrl
+      );
+      setIsPlaybackMode(true);
+      setVideoPlaying(false); // Reset video playing state
+    } else {
+      console.warn("⚠️ No recorded video available for playback");
+    }
+  };
+
+  const handleBackToEditor = () => {
+    console.log("📝 Switching back to editor mode");
+    setIsPlaybackMode(false);
+    setVideoPlaying(false);
+  };
 
   useEffect(() => {
     const video = videoRef.current;
@@ -147,32 +165,44 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
     <div className="space-y-6">
       <div className="space-y-4">
         <div
-          className="relative border border-gray-200 p-5 rounded-lg "
+          className="relative border border-gray-200 p-5 rounded-lg"
           style={{ aspectRatio: "16/9" }}
         >
           <UnifiedCritiqueControls
             isRecording={isRecording}
             onStartCritique={startCritique}
             onStopCritique={handleStopRecording}
-            onSaveDraft={saveDraft}
-            onPreviewCritique={onPreviewCritique}
+            onPlayRecording={handlePlayRecording}
             hasRecordedData={hasRecordedData}
-            isSaving={isSaving}
             permissionStatus={permissionStatus}
             errorMessage={errorMessage}
           />
+
+          {/* Playback Mode Header */}
+          {isPlaybackMode && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-semibold text-green-800">
+                    🎬 Playing Recorded Video
+                  </span>
+                </div>
+                <Button
+                  onClick={handleBackToEditor}
+                  variant="outline"
+                  size="sm"
+                  className="text-green-700 border-green-300 hover:bg-green-100"
+                >
+                  Back to Editor
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div
             ref={videoContainerRef}
             className="rounded-lg overflow-hidden relative group"
-            // onClick={() => {
-            //   if (videoPlaying) {
-            //     videoRef.current?.pause();
-            //     setVideoPlaying(false);
-            //   } else {
-            //     videoRef.current?.play();
-            //     setVideoPlaying(true);
-            //   }
-            // }}
           >
             {!videoPlaying && (
               <div className="absolute top-0 left-0 bg-black/50 w-full h-full rounded-lg flex items-center justify-center z-20">
@@ -187,14 +217,18 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
                 </button>
               </div>
             )}
-            <Button
-              onClick={handleDrawingToggle}
-              variant={isDrawingMode ? "default" : "outline"}
-              className={`absolute top-5 right-5 z-20 rounded-full h-10 w-10 p-0 ${isDrawingMode ? "bg-blue-600 hover:bg-blue-700" : ""}`}
-              disabled={!isRecording}
-            >
-              <Highlighter className="h-4 w-4" />
-            </Button>
+
+            {/* Only show drawing button when not in playback mode and recording */}
+            {!isPlaybackMode && (
+              <Button
+                onClick={handleDrawingToggle}
+                variant={isDrawingMode ? "default" : "outline"}
+                className={`absolute top-5 right-5 z-20 rounded-full h-10 w-10 p-0 ${isDrawingMode ? "bg-blue-600 hover:bg-blue-700" : ""}`}
+                disabled={!isRecording}
+              >
+                <Highlighter className="h-4 w-4" />
+              </Button>
+            )}
 
             <video
               ref={videoRef}
@@ -202,18 +236,25 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
               className="w-full h-full object-contain rounded-lg"
               preload="metadata"
               playsInline
+              controls={isPlaybackMode} // Show native controls in playback mode
             />
-            <div className="group-hover:opacity-100 opacity-0 transition-all duration-300 absolute bottom-0 left-0 right-0 z-20">
-              <VideoControls videoRef={videoRef} />
-            </div>
 
-            <DrawingCanvasFixed
-              containerRef={videoContainerRef}
-              isActive={isDrawingMode}
-              videoRef={videoRef}
-              isRecording={isRecording}
-              onDrawAction={handleDrawAction}
-            />
+            {!isPlaybackMode && (
+              <div className="group-hover:opacity-100 opacity-0 transition-all duration-300 absolute bottom-0 left-0 right-0 z-20">
+                <VideoControls videoRef={videoRef} />
+              </div>
+            )}
+
+            {/* Only show drawing canvas when not in playback mode */}
+            {!isPlaybackMode && (
+              <DrawingCanvasFixed
+                containerRef={videoContainerRef}
+                isActive={isDrawingMode}
+                videoRef={videoRef}
+                isRecording={isRecording}
+                onDrawAction={handleDrawAction}
+              />
+            )}
           </div>
 
           {videoError && (

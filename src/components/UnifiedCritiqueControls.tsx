@@ -1,16 +1,14 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Eye, Monitor, Save, Square } from "lucide-react";
+import { Monitor, Play, Square } from "lucide-react";
 import React from "react";
 
 interface UnifiedCritiqueControlsProps {
   isRecording: boolean;
   onStartCritique: () => void;
   onStopCritique: () => void;
-  onSaveDraft: () => void;
-  onPreviewCritique: () => void;
+  onPlayRecording?: () => void;
   hasRecordedData: boolean;
-  isSaving: boolean;
   permissionStatus?: "unknown" | "granted" | "denied";
   errorMessage?: string | null;
 }
@@ -19,10 +17,8 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
   isRecording,
   onStartCritique,
   onStopCritique,
-  onSaveDraft,
-  onPreviewCritique,
+  onPlayRecording,
   hasRecordedData,
-  isSaving,
   permissionStatus = "unknown",
   errorMessage,
 }) => {
@@ -50,14 +46,11 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
     onStartCritique();
   };
 
-  const handlePreviewClick = () => {
-    console.log("👁️ Preview button clicked, hasRecordedData:", hasRecordedData);
-    onPreviewCritique();
-  };
-
-  const handleSaveClick = () => {
-    console.log("💾 Save Draft button clicked");
-    onSaveDraft();
+  const handleViewRecordingClick = () => {
+    console.log("👁️ View Recording button clicked");
+    if (onPlayRecording) {
+      onPlayRecording();
+    }
   };
 
   return (
@@ -95,15 +88,29 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
 
         <div className="flex flex-wrap gap-3 items-start justify-end">
           {!isRecording ? (
-            <Button
-              onClick={handleStartClick}
-              disabled={!canStartRecording}
-              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 px-4 py-3"
-              size="sm"
-            >
-              <Monitor className="w-5 h-5" />
-              Start Screen Recording
-            </Button>
+            <>
+              <Button
+                onClick={handleStartClick}
+                disabled={!canStartRecording}
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 px-4 py-3"
+                size="sm"
+              >
+                <Monitor className="w-5 h-5" />
+                Start Screen Recording
+              </Button>
+
+              {hasRecordedData && (
+                <Button
+                  onClick={handleViewRecordingClick}
+                  variant="outline"
+                  className="flex items-center gap-2 bg-green-50 hover:bg-green-100 border-green-300 text-green-700"
+                  size="sm"
+                >
+                  <Play className="w-4 h-4" />
+                  View Recording
+                </Button>
+              )}
+            </>
           ) : (
             <>
               <Button
@@ -122,30 +129,6 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
                   🎥 Screen Recording in Progress...
                 </span>
               </div>
-            </>
-          )}
-
-          {hasRecordedData && (
-            <>
-              <Button
-                onClick={handleSaveClick}
-                variant="outline"
-                className="flex items-center gap-2"
-                size="sm"
-              >
-                <Save className="w-4 h-4" />
-                {isSaving ? "Saving..." : "Save Draft"}
-              </Button>
-
-              <Button
-                onClick={handlePreviewClick}
-                disabled={!hasRecordedData || isRecording}
-                variant="outline"
-                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 border-blue-300"
-              >
-                <Eye className="w-4 h-4" />
-                Preview Critique
-              </Button>
             </>
           )}
         </div>

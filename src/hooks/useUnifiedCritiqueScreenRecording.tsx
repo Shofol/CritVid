@@ -46,7 +46,6 @@ export const useUnifiedCritiqueScreenRecording = (
   const { videoId } = useParams<{ videoId: string }>();
   const [drawActions, setDrawActionsState] = useState<DrawAction[]>([]);
   const [isDrawingEnabled, setIsDrawingEnabled] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const cleanupRef = useRef<(() => void)[]>([]);
 
@@ -221,11 +220,6 @@ export const useUnifiedCritiqueScreenRecording = (
       if (isRecording) {
         await stopRecording();
         console.log("🎥 Screen recording stopped");
-
-        // Auto-save the critique session for preview
-        setTimeout(() => {
-          saveDraft();
-        }, 1000); // Small delay to ensure recording data is available
       }
 
       // Clear initialization state
@@ -242,57 +236,6 @@ export const useUnifiedCritiqueScreenRecording = (
     }
   }, [isRecording, isInitializing, stopRecording, performCleanup, videoRef]);
 
-  const saveDraft = useCallback(async () => {
-    if (isRecording) {
-      console.warn("⚠️ Cannot save while recording");
-      return;
-    }
-
-    setIsSaving(true);
-    console.log(
-      "💾 Saving screen recording critique draft with timeline data..."
-    );
-
-    try {
-      const session: CritiqueSession = {
-        videoUrl,
-        recordedVideoUrl: recordedVideoUrl,
-        drawActions: safeArrayAccess(drawActions),
-        videoActions: safeArrayAccess(videoActions),
-        timelineEvents: safeArrayAccess(timelineEvents),
-        createdAt: new Date().toISOString(),
-        id: videoId || "demo",
-      };
-
-      localStorage.setItem(
-        `critique_draft_${videoId || "demo"}`,
-        JSON.stringify(session)
-      );
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("✅ Screen recording critique draft saved with", {
-        drawActions: session.drawActions.length,
-        timelineEvents: session.timelineEvents.length,
-        hasRecordedVideo: !!session.recordedVideoUrl,
-      });
-    } catch (error) {
-      console.error(
-        "❌ Failed to save screen recording critique draft:",
-        error
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  }, [
-    isRecording,
-    drawActions,
-    videoActions,
-    timelineEvents,
-    recordedVideoUrl,
-    videoUrl,
-    videoId,
-  ]);
-
   const hasRecordedData =
     recordedVideoUrl ||
     safeArrayAccess(drawActions).length > 0 ||
@@ -306,13 +249,11 @@ export const useUnifiedCritiqueScreenRecording = (
     videoActions: safeArrayAccess(videoActions),
     timelineEvents: safeArrayAccess(timelineEvents),
     isDrawingEnabled,
-    isSaving,
     hasRecordedData,
     permissionStatus,
     errorMessage,
     startCritique,
     stopCritique,
-    saveDraft,
     handleVideoAction,
     clearCanvas,
   };
