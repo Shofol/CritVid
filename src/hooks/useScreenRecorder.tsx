@@ -12,6 +12,7 @@ interface ScreenRecorderOptions {
 export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
+  const [recordedVideoBlob, setRecordedVideoBlob] = useState<Blob | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<
     "unknown" | "granted" | "denied"
   >("unknown");
@@ -40,6 +41,8 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           noiseSuppression: true,
           autoGainControl: true,
         },
+        preferCurrentTab: true,
+        selfBrowserSurface: 'include'
       });
 
       // Request microphone audio
@@ -55,6 +58,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           sampleSize: { ideal: 16, min: 16 }, // 16-bit audio depth
           channelCount: { ideal: 1, exact: 1 }, // Mono for voice (clearer than stereo for speech)
         },
+
       });
 
       // Stop test streams
@@ -110,6 +114,8 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           noiseSuppression: true,
           autoGainControl: true,
         },
+        preferCurrentTab: true,
+        selfBrowserSurface: 'include'
       });
 
       console.log(
@@ -288,6 +294,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
         const videoUrl = URL.createObjectURL(videoBlob);
 
         setRecordedVideoUrl(videoUrl);
+        setRecordedVideoBlob(videoBlob);
         console.log("✅ Screen recording completed:", videoBlob.size, "bytes");
 
         if (options.onStop) options.onStop(videoBlob);
@@ -375,6 +382,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
 
     console.log("🧹 Clearing screen recording...");
     setRecordedVideoUrl(null);
+    setRecordedVideoBlob(null);
     setErrorMessage(null);
     chunksRef.current = [];
 
@@ -390,6 +398,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
   return {
     isRecording,
     recordedVideoUrl,
+    recordedVideoBlob,
     permissionStatus,
     errorMessage,
     requestPermissions,

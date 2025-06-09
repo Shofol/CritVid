@@ -52,6 +52,7 @@ export const useUnifiedCritiqueScreenRecording = (
   const {
     isRecording,
     recordedVideoUrl,
+    recordedVideoBlob,
     permissionStatus,
     errorMessage,
     startRecording,
@@ -244,6 +245,7 @@ export const useUnifiedCritiqueScreenRecording = (
   return {
     isRecording: isRecording || isInitializing,
     recordedVideoUrl,
+    recordedVideoBlob,
     drawActions: safeArrayAccess(drawActions),
     setDrawActions: addDrawAction,
     videoActions: safeArrayAccess(videoActions),

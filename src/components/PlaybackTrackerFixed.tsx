@@ -1,3 +1,5 @@
+import { toast } from "@/components/ui/use-toast";
+import { uploadRecordedVideo } from "@/lib/storage";
 import { Highlighter, Play } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useUnifiedCritiqueScreenRecording } from "../hooks/useUnifiedCritiqueScreenRecording";
@@ -6,11 +8,21 @@ import UnifiedCritiqueControls from "./UnifiedCritiqueControls";
 import VideoControls from "./VideoControls";
 import { Button } from "./ui/button";
 
+interface DrawAction {
+  path: { x: number; y: number }[];
+  timestamp: number;
+  startTime: number;
+  endTime: number;
+  color: string;
+  width: number;
+  id?: string;
+}
+
 interface PlaybackTrackerProps {
   videoUrl: string;
   setRecordedAudioUrl: (url: string | null) => void;
-  drawActions: any[];
-  setDrawActions: (actions: any[]) => void;
+  drawActions: DrawAction[];
+  setDrawActions: (actions: DrawAction[]) => void;
   videoRef: React.RefObject<HTMLVideoElement>;
 }
 
@@ -30,6 +42,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
   const {
     isRecording,
     recordedVideoUrl,
+    recordedVideoBlob,
     hasRecordedData,
     permissionStatus,
     errorMessage,
@@ -139,7 +152,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
     console.log("🎨 Drawing mode toggled:", !isDrawingMode);
   };
 
-  const handleDrawAction = (action: any) => {
+  const handleDrawAction = (action: DrawAction) => {
     console.log("📝 Received draw action:", action);
     if (addDrawAction) {
       addDrawAction(action);
@@ -161,6 +174,38 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
     }
   };
 
+  const handleUploadRecording = async () => {
+    if (!recordedVideoBlob) {
+      console.warn("⚠️ No recorded video blob available for upload");
+      toast({
+        title: "Upload Failed",
+        description: "No recorded video available to upload.",
+        variant: "destructive" as const
+      });
+      return;
+    }
+
+    try {
+      console.log("☁️ Starting video upload to Supabase storage...");
+
+      const filePath = await uploadRecordedVideo(recordedVideoBlob);
+
+      console.log("✅ Video uploaded successfully to:", filePath);
+      toast({
+        title: "Upload Successful",
+        description: `Video uploaded to cloud storage at ${filePath}`,
+        variant: "default"
+      });
+    } catch (error) {
+      console.error("❌ Failed to upload video:", error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload video to cloud storage. Please try again.",
+        variant: "destructive" as const
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -173,6 +218,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
             onStartCritique={startCritique}
             onStopCritique={handleStopRecording}
             onPlayRecording={handlePlayRecording}
+            onUploadRecording={handleUploadRecording}
             hasRecordedData={hasRecordedData}
             permissionStatus={permissionStatus}
             errorMessage={errorMessage}
@@ -236,7 +282,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
               className="w-full h-full object-contain rounded-lg"
               preload="metadata"
               playsInline
-              controls={isPlaybackMode} // Show native controls in playback mode
+              controls={!!isPlaybackMode} // Show native controls in playback mode
             />
 
             {!isPlaybackMode && (

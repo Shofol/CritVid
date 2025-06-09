@@ -1,7 +1,15 @@
 import { AppLayout } from "@/components/AppLayout";
 import PlaybackTrackerFixed from "@/components/PlaybackTrackerFixed";
+import { CritiqueSession, TimelineEvent } from "@/types/critiqueTypes";
+import { DrawAction } from "@/types/timelineTypes";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { testBucketSetup } from "../utils/testBucketSetup";
+
+// Make test function available in console for debugging
+if (typeof window !== 'undefined') {
+  (window as any).testBucketSetup = testBucketSetup;
+}
 
 interface DrawAction {
   path: { x: number; y: number }[];

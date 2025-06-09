@@ -1,13 +1,14 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Monitor, Play, Square } from "lucide-react";
-import React from "react";
+import { Monitor, Play, Square, Upload } from "lucide-react";
+import React, { useState } from "react";
 
 interface UnifiedCritiqueControlsProps {
   isRecording: boolean;
   onStartCritique: () => void;
   onStopCritique: () => void;
   onPlayRecording?: () => void;
+  onUploadRecording?: () => Promise<void>;
   hasRecordedData: boolean;
   permissionStatus?: "unknown" | "granted" | "denied";
   errorMessage?: string | null;
@@ -18,10 +19,13 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
   onStartCritique,
   onStopCritique,
   onPlayRecording,
+  onUploadRecording,
   hasRecordedData,
   permissionStatus = "unknown",
   errorMessage,
 }) => {
+  const [isUploading, setIsUploading] = useState(false);
+
   const canStartRecording =
     permissionStatus === "granted" || permissionStatus === "unknown";
   const showPermissionWarning = permissionStatus === "denied";
@@ -50,6 +54,20 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
     console.log("👁️ View Recording button clicked");
     if (onPlayRecording) {
       onPlayRecording();
+    }
+  };
+
+  const handleUploadClick = async () => {
+    console.log("☁️ Upload Recording button clicked");
+    if (onUploadRecording) {
+      setIsUploading(true);
+      try {
+        await onUploadRecording();
+      } catch (error) {
+        console.error("Upload failed:", error);
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -96,19 +114,32 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
                 size="sm"
               >
                 <Monitor className="w-5 h-5" />
-                Start Screen Recording
+                Start Critique Recording
               </Button>
 
               {hasRecordedData && (
-                <Button
-                  onClick={handleViewRecordingClick}
-                  variant="outline"
-                  className="flex items-center gap-2 bg-green-50 hover:bg-green-100 border-green-300 text-green-700"
-                  size="sm"
-                >
-                  <Play className="w-4 h-4" />
-                  View Recording
-                </Button>
+                <>
+                  <Button
+                    onClick={handleViewRecordingClick}
+                    variant="outline"
+                    className="flex items-center gap-2 bg-green-50 hover:bg-green-100 border-green-300 text-green-700"
+                    size="sm"
+                  >
+                    <Play className="w-4 h-4" />
+                    View Recording
+                  </Button>
+
+                  <Button
+                    onClick={handleUploadClick}
+                    disabled={isUploading}
+                    variant="outline"
+                    className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 disabled:opacity-50"
+                    size="sm"
+                  >
+                    <Upload className="w-4 h-4" />
+                    {isUploading ? "Uploading..." : "Upload to Cloud"}
+                  </Button>
+                </>
               )}
             </>
           ) : (
