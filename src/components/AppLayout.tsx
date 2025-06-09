@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 
 interface AppLayoutProps {
   children: React.ReactNode;
+  noHeader: boolean;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({

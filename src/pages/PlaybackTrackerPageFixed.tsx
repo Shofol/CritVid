@@ -63,7 +63,7 @@ const PlaybackTrackerPageFixed: React.FC = () => {
   }, [videoId]);
 
   return (
-    <AppLayout>
+    <AppLayout noHeader={true}>
       <div className="container mx-auto -mt-16">
         <PlaybackTrackerFixed
           videoUrl={videoUrl}
