@@ -45,10 +45,15 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
       // Request microphone audio
       const micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
+          // Enhanced noise suppression and echo cancellation
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-          sampleRate: 44100,
+
+          // Higher quality audio settings for clarity
+          sampleRate: { ideal: 48000, min: 44100 }, // Higher sample rate for better clarity
+          sampleSize: { ideal: 16, min: 16 }, // 16-bit audio depth
+          channelCount: { ideal: 1, exact: 1 }, // Mono for voice (clearer than stereo for speech)
         },
       });
 
@@ -93,6 +98,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
       chunksRef.current = [];
 
       // Get screen stream with audio
+      console.log("📺 Requesting screen capture with audio...");
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: {
           width: { ideal: 1920 },
@@ -106,15 +112,31 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
         },
       });
 
+      console.log(
+        "🎧 Screen stream audio tracks:",
+        screenStream.getAudioTracks().length
+      );
+
       // Get microphone stream
+      console.log("🎤 Requesting microphone access...");
       const micStream = await navigator.mediaDevices.getUserMedia({
         audio: {
+          // Enhanced noise suppression and echo cancellation
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-          sampleRate: 44100,
+
+          // Higher quality audio settings for clarity
+          sampleRate: { ideal: 48000, min: 44100 }, // Higher sample rate for better clarity
+          sampleSize: { ideal: 16, min: 16 }, // 16-bit audio depth
+          channelCount: { ideal: 1, exact: 1 }, // Mono for voice (clearer than stereo for speech)
         },
       });
+
+      console.log(
+        "🎙️ Microphone stream audio tracks:",
+        micStream.getAudioTracks().length
+      );
 
       screenStreamRef.current = screenStream;
       micStreamRef.current = micStream;
@@ -126,30 +148,91 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
       const videoTrack = screenStream.getVideoTracks()[0];
       if (videoTrack) {
         combinedStream.addTrack(videoTrack);
+        console.log("✅ Video track added to combined stream");
+      } else {
+        throw new Error("No video track available from screen capture");
       }
 
-      // Mix audio streams using Web Audio API
-      const audioContext = new AudioContext();
-      const screenSource = screenStream.getAudioTracks()[0]
-        ? audioContext.createMediaStreamSource(
-            new MediaStream([screenStream.getAudioTracks()[0]])
-          )
-        : null;
-      const micSource = audioContext.createMediaStreamSource(micStream);
-      const destination = audioContext.createMediaStreamDestination();
+      // Handle audio mixing more robustly
+      const screenAudioTracks = screenStream.getAudioTracks();
+      const micAudioTracks = micStream.getAudioTracks();
 
-      // Connect both audio sources to the destination
-      if (screenSource) {
-        screenSource.connect(destination);
+      console.log(
+        `🔊 Found ${screenAudioTracks.length} screen audio track(s) and ${micAudioTracks.length} mic audio track(s)`
+      );
+
+      if (screenAudioTracks.length === 0 && micAudioTracks.length === 0) {
+        // No audio at all - warn but continue with video only
+        console.warn("⚠️ No audio tracks available - recording video only");
+        setErrorMessage(
+          "⚠️ No audio detected. Make sure to check 'Share audio' when prompted and enable microphone access."
+        );
+      } else if (screenAudioTracks.length > 0 && micAudioTracks.length > 0) {
+        // Both audio sources available - mix them
+        console.log("🎵 Mixing screen and microphone audio...");
+        try {
+          const audioContext = new AudioContext();
+          const screenSource = audioContext.createMediaStreamSource(
+            new MediaStream([screenAudioTracks[0]])
+          );
+          const micSource = audioContext.createMediaStreamSource(micStream);
+          const destination = audioContext.createMediaStreamDestination();
+
+          // Create gain nodes for volume control
+          const screenGain = audioContext.createGain();
+          const micGain = audioContext.createGain();
+
+          // Set volumes (you can adjust these)
+          screenGain.gain.value = 0.8; // Screen audio at 80%
+          micGain.gain.value = 1.0; // Microphone at 100%
+
+          // Connect sources through gain nodes to destination
+          screenSource.connect(screenGain);
+          micSource.connect(micGain);
+          screenGain.connect(destination);
+          micGain.connect(destination);
+
+          // Add mixed audio track to combined stream
+          destination.stream.getAudioTracks().forEach((track) => {
+            combinedStream.addTrack(track);
+            console.log("✅ Mixed audio track added to combined stream");
+          });
+        } catch (audioError) {
+          console.error(
+            "❌ Audio mixing failed, falling back to microphone only:",
+            audioError
+          );
+          // Fallback to microphone only
+          micAudioTracks.forEach((track) => {
+            combinedStream.addTrack(track);
+            console.log(
+              "✅ Microphone audio track added to combined stream (fallback)"
+            );
+          });
+        }
+      } else if (screenAudioTracks.length > 0) {
+        // Only screen audio available
+        console.log("🔊 Using screen audio only");
+        screenAudioTracks.forEach((track) => {
+          combinedStream.addTrack(track);
+          console.log("✅ Screen audio track added to combined stream");
+        });
+      } else if (micAudioTracks.length > 0) {
+        // Only microphone audio available
+        console.log("🎤 Using microphone audio only");
+        micAudioTracks.forEach((track) => {
+          combinedStream.addTrack(track);
+          console.log("✅ Microphone audio track added to combined stream");
+        });
       }
-      micSource.connect(destination);
-
-      // Add mixed audio track to combined stream
-      destination.stream.getAudioTracks().forEach((track) => {
-        combinedStream.addTrack(track);
-      });
 
       combinedStreamRef.current = combinedStream;
+
+      // Log final stream composition
+      console.log("🎬 Final combined stream composition:", {
+        videoTracks: combinedStream.getVideoTracks().length,
+        audioTracks: combinedStream.getAudioTracks().length,
+      });
 
       // Determine MIME type
       let mimeType = "video/webm;codecs=vp9,opus";
@@ -163,10 +246,12 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
         }
       }
 
+      console.log("📼 Using MIME type:", mimeType);
+
       const mediaRecorder = new MediaRecorder(combinedStream, {
         mimeType,
         videoBitsPerSecond: options.videoBitsPerSecond || 2500000, // 2.5 Mbps
-        audioBitsPerSecond: options.audioBitsPerSecond || 128000, // 128 kbps
+        audioBitsPerSecond: options.audioBitsPerSecond || 192000, // Enhanced 192 kbps for clearer audio
       });
       mediaRecorderRef.current = mediaRecorder;
 

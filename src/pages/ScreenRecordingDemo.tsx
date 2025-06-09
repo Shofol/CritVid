@@ -49,7 +49,7 @@ const ScreenRecordingDemo: React.FC = () => {
   };
 
   return (
-    <AppLayout>
+    <AppLayout noHeader={false}>
       <div className="container mx-auto py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
@@ -72,23 +72,65 @@ const ScreenRecordingDemo: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ol className="list-decimal list-inside space-y-2 text-sm">
-                  <li>Click "Start Screen Recording" below</li>
-                  <li>
-                    Grant screen recording and microphone permissions when
-                    prompted
-                  </li>
-                  <li>Select which screen/window to record</li>
-                  <li>
-                    Make sure to check "Share audio" in the browser dialog
+                <ol className="list-decimal list-inside space-y-3 text-sm">
+                  <li className="font-medium">
+                    Click "Start Screen Recording" below
                   </li>
                   <li>
-                    The recording will capture both your screen video and mixed
-                    audio (system + microphone)
+                    <span className="font-medium">IMPORTANT:</span> When the
+                    browser asks for screen recording permissions:
+                    <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                      <li>Choose the screen/window you want to record</li>
+                      <li className="text-red-600 font-medium">
+                        ✅ CHECK the "Share audio" or "Share system audio"
+                        checkbox
+                      </li>
+                      <li>This ensures video/system sounds are captured</li>
+                    </ul>
+                  </li>
+                  <li>
+                    <span className="font-medium">Grant microphone access</span>{" "}
+                    when prompted (for your voice commentary)
+                  </li>
+                  <li>
+                    The recording will capture:
+                    <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                      <li>📹 Screen video</li>
+                      <li>
+                        🔊 System/application audio (if "Share audio" was
+                        checked)
+                      </li>
+                      <li>🎤 Your microphone audio</li>
+                    </ul>
                   </li>
                   <li>Click "Stop Recording" when finished</li>
                   <li>Download or preview your recording</li>
                 </ol>
+
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-start gap-2">
+                    <span className="text-yellow-600 font-bold">💡</span>
+                    <div>
+                      <p className="text-sm text-yellow-800 font-medium mb-1">
+                        Troubleshooting Audio Issues:
+                      </p>
+                      <ul className="text-xs text-yellow-700 space-y-1">
+                        <li>
+                          • No sound? Make sure you checked "Share audio" in the
+                          screen sharing dialog
+                        </li>
+                        <li>
+                          • No microphone? Check browser permissions and allow
+                          microphone access
+                        </li>
+                        <li>
+                          • Volume issues? Adjust your system volume and
+                          microphone levels
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
