@@ -92,7 +92,7 @@ const AuthCard: React.FC<AuthCardProps> = ({
         By continuing, you agree to our{" "}
         <a
           href="/terms"
-          className="underline underline-offset-4 hover:text-primary pr-1"
+          className="underline underline-offset-4 hover:text-primary px-1"
         >
           Terms of Service
         </a>

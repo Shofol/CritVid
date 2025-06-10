@@ -42,7 +42,8 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           autoGainControl: true,
         },
         preferCurrentTab: true,
-        selfBrowserSurface: 'include'
+        selfBrowserSurface: 'include',
+        systemAudio: "include",
       });
 
       // Request microphone audio
@@ -115,7 +116,8 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           autoGainControl: true,
         },
         preferCurrentTab: true,
-        selfBrowserSurface: 'include'
+        selfBrowserSurface: 'include',
+        systemAudio: "include",
       });
 
       console.log(
