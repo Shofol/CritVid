@@ -17,6 +17,7 @@ interface AuthCardProps {
   title?: string;
   description?: string;
   children?: ReactNode;
+  role: string;
 }
 
 const AuthCard: React.FC<AuthCardProps> = ({
@@ -24,6 +25,7 @@ const AuthCard: React.FC<AuthCardProps> = ({
   title,
   description,
   children,
+  role,
 }) => {
   const [isSignUp, setIsSignUp] = useState(initialIsSignUp);
   const [isLoading, setIsLoading] = useState(false);
@@ -82,6 +84,7 @@ const AuthCard: React.FC<AuthCardProps> = ({
             </div>
 
             <EmailSignInForm
+              role={role}
               isSignUp={isSignUp}
               onToggleMode={() => setIsSignUp(!isSignUp)}
             />

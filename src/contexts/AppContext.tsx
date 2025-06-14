@@ -18,6 +18,7 @@ type AppContextType = {
   sidebarOpen: boolean;
   userRole: UserRole;
   setUserRole: (role: UserRole) => void;
+  setSidebarOpen: (open: boolean) => void;
   privateCritiqueMode: boolean;
   setPrivateCritiqueMode: (enabled: boolean) => void;
 };
@@ -29,6 +30,7 @@ const AppContext = createContext<AppContextType>({
   sidebarOpen: false,
   userRole: "client",
   setUserRole: () => {},
+  setSidebarOpen: () => {},
   privateCritiqueMode: false,
   setPrivateCritiqueMode: () => {},
 });
@@ -42,7 +44,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const { user, loading: isLoading, isAuthenticated } = useAuth();
 
   // Keep only app-specific state
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>("client");
   const [privateCritiqueMode, setPrivateCritiqueMode] = useState(false);
 
@@ -90,6 +92,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     sidebarOpen,
     userRole,
     setUserRole,
+    setSidebarOpen,
     privateCritiqueMode,
     setPrivateCritiqueMode,
   };

@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  noHeader: boolean;
+  noHeader?: boolean;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({
@@ -23,8 +23,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     <div className="min-h-screen bg-background">
       {!noHeader && <Header />}
       <div className="flex">
-        <RoleSidebar className={sidebarOpen ? "block" : ""} />
-        <main className="flex-1 p-4 pt-20 md:ml-64">{children}</main>
+        <RoleSidebar className={sidebarOpen ? "block" : "hidden md:hidden"} />
+        <main className={"flex-1 p-4 " + (sidebarOpen ? "md:ml-64" : "")}>
+          {children}
+        </main>
       </div>
     </div>
   );

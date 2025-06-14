@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { MoonIcon, SunIcon, MenuIcon } from 'lucide-react';
-import { useTheme } from '@/components/theme-provider';
-import Logo from '../Logo';
-import HeaderAuthButton from '../auth/HeaderAuthButton';
-import ProfileButton from '../auth/ProfileButton';
-import { useApp } from '@/contexts/AppContext';
+import { useTheme } from "@/components/theme-provider";
+import { Button } from "@/components/ui/button";
+import { useApp } from "@/contexts/AppContext";
+import { MenuIcon, MoonIcon, SunIcon } from "lucide-react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import Logo from "../Logo";
+import HeaderAuthButton from "../auth/HeaderAuthButton";
+import ProfileButton from "../auth/ProfileButton";
 
 const LandingHeader: React.FC = () => {
   const { theme, setTheme } = useTheme();
@@ -14,7 +14,7 @@ const LandingHeader: React.FC = () => {
   const { isAuthenticated } = useApp();
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
@@ -28,41 +28,68 @@ const LandingHeader: React.FC = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="/find-adjudicator" className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white">
-            Find Adjudicators
+          <Link
+            to="/signup?role=adjudicator"
+            className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white"
+          >
+            Join as an Adjudicator
           </Link>
-          <Link to="/guidelines" className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white">
+          <Link
+            to="/guidelines"
+            className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white"
+          >
             Guidelines
           </Link>
-          <Link to="/help" className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white">
+          <Link
+            to="/help"
+            className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white"
+          >
             Help
           </Link>
-          <Link to="/contact" className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white">
+          <Link
+            to="/contact"
+            className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white"
+          >
             Contact
           </Link>
-          
-          {isAuthenticated ? (
-            <ProfileButton />
-          ) : (
-            <HeaderAuthButton />
-          )}
-          
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-white">
-            {theme === 'dark' ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+
+          {isAuthenticated ? <ProfileButton /> : <HeaderAuthButton />}
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="text-white"
+          >
+            {theme === "dark" ? (
+              <SunIcon className="h-5 w-5" />
+            ) : (
+              <MoonIcon className="h-5 w-5" />
+            )}
           </Button>
         </nav>
 
         {/* Mobile Menu Button */}
         <div className="flex md:hidden items-center gap-2">
-          {isAuthenticated ? (
-            <ProfileButton />
-          ) : (
-            <HeaderAuthButton />
-          )}
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-white">
-            {theme === 'dark' ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+          {isAuthenticated ? <ProfileButton /> : <HeaderAuthButton />}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="text-white"
+          >
+            {theme === "dark" ? (
+              <SunIcon className="h-5 w-5" />
+            ) : (
+              <MoonIcon className="h-5 w-5" />
+            )}
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="text-white"
+          >
             <MenuIcon className="h-5 w-5" />
           </Button>
         </div>
@@ -72,29 +99,29 @@ const LandingHeader: React.FC = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t py-4 px-6 bg-black">
           <nav className="flex flex-col space-y-4">
-            <Link 
-              to="/find-adjudicator" 
+            <Link
+              to="/find-adjudicator"
               className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white"
               onClick={() => setMobileMenuOpen(false)}
             >
               Find Adjudicators
             </Link>
-            <Link 
-              to="/guidelines" 
+            <Link
+              to="/guidelines"
               className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white"
               onClick={() => setMobileMenuOpen(false)}
             >
               Guidelines
             </Link>
-            <Link 
-              to="/help" 
+            <Link
+              to="/help"
               className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white"
               onClick={() => setMobileMenuOpen(false)}
             >
               Help
             </Link>
-            <Link 
-              to="/contact" 
+            <Link
+              to="/contact"
               className="text-sm font-medium hover:underline underline-offset-4 text-gray-300 hover:text-white"
               onClick={() => setMobileMenuOpen(false)}
             >

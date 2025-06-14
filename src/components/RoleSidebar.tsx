@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { useApp } from '@/contexts/AppContext';
-import { getNavigationByRole } from '@/data/navigationData';
+import { useApp } from "@/contexts/AppContext";
+import { getNavigationByRole } from "@/data/navigationData";
+import { cn } from "@/lib/utils";
+import React, { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 interface RoleSidebarProps {
   className?: string;
@@ -11,34 +11,39 @@ interface RoleSidebarProps {
 const RoleSidebar: React.FC<RoleSidebarProps> = ({ className }) => {
   const location = useLocation();
   const { userRole } = useApp();
-  
+
   // Debug logging to check the current role
   useEffect(() => {
-    console.log('Current user role in RoleSidebar:', userRole);
+    console.log("Current user role in RoleSidebar:", userRole);
   }, [userRole]);
 
   const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+    return (
+      location.pathname === path || location.pathname.startsWith(`${path}/`)
+    );
   };
 
   // Get navigation sections based on user role
   const navigationSections = getNavigationByRole(userRole);
-  
+
   // Debug logging to check the navigation items
   useEffect(() => {
-    console.log('Navigation sections for role', userRole, ':', navigationSections);
+    console.log(
+      "Navigation sections for role",
+      userRole,
+      ":",
+      navigationSections
+    );
   }, [navigationSections, userRole]);
 
   return (
-    <div className={cn('fixed h-full z-30 left-0 top-16 hidden md:block w-64 border-r bg-background', className)}>
-      <div className="space-y-4 py-4">
-        {/* Display the current role */}
-        <div className="px-4 py-2">
-          <div className="bg-muted/50 rounded-md px-3 py-2 text-sm font-medium">
-            Role: {userRole}
-          </div>
-        </div>
-        
+    <div
+      className={cn(
+        "fixed h-full z-30 left-0 top-16 hidden md:block w-64 border-r bg-background",
+        className
+      )}
+    >
+      <div className="space-y-4 py-4 ">
         {navigationSections.map((section, index) => (
           <div key={index} className="px-4 py-2">
             <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
@@ -50,10 +55,10 @@ const RoleSidebar: React.FC<RoleSidebarProps> = ({ className }) => {
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    'flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    "flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
                     isActive(item.path)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-accent hover:text-accent-foreground'
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <span className="mr-2">
