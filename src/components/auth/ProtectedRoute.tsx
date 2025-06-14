@@ -1,6 +1,7 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from "@/hooks/useAuth";
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useApp } from "../../contexts/AppContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,15 +10,16 @@ interface ProtectedRouteProps {
   studioOnly?: boolean;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
   adminOnly = false,
   adjudicatorOnly = false,
-  studioOnly = false
+  studioOnly = false,
 }) => {
   const { user, loading, isAuthenticated } = useAuth();
   const location = useLocation();
-  
+  const { userRole } = useApp();
+
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -36,21 +38,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Get user role from user metadata or default to 'client'
-  const userRole = user.user_metadata?.role || 'client';
+  // const userRole = user.user_metadata?.role || 'client';
 
   // Check role-based access
-  if (adminOnly && userRole !== 'admin') {
+  if (adminOnly && userRole !== "admin") {
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (adjudicatorOnly && userRole !== 'adjudicator') {
+  if (adjudicatorOnly && userRole !== "adjudicator") {
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (studioOnly && !['studio-owner', 'studio_critique'].includes(userRole)) {
+  if (studioOnly && !["studio-owner", "studio_critique"].includes(userRole)) {
     return <Navigate to="/dashboard" replace />;
   }
-  
+
   return <>{children}</>;
 };
 

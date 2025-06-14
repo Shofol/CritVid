@@ -4,11 +4,10 @@ import { useApp } from "@/contexts/AppContext";
 import { MenuIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import AuthButtons from "./auth/AuthButtons";
 import HeaderAuthButton from "./auth/HeaderAuthButton";
 import ProfileButton from "./auth/ProfileButton";
 import Logo from "./Logo";
-import RoleSwitcher from "./RoleSwitcher";
+// import RoleSwitcher from "./RoleSwitcher";
 
 const Header = () => {
   const { theme, setTheme } = useTheme();
@@ -22,7 +21,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Auth buttons at very top */}
-      <div className="container flex h-10 items-center justify-between border-b border-border/40">
+      {/* <div className="container flex h-10 items-center justify-between border-b border-border/40">
         <div className="flex items-center gap-2">
           <div className="mr-2 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 rounded text-xs">
             DEV
@@ -30,7 +29,7 @@ const Header = () => {
           <RoleSwitcher />
         </div>
         {!isAuthenticated && <AuthButtons />}
-      </div>
+      </div> */}
 
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">

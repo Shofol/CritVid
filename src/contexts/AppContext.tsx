@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { UserRole } from "@/types/navigation";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 type User = {
   id: string;
@@ -45,45 +46,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Keep only app-specific state
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [userRole, setUserRole] = useState<UserRole>("client");
+  const [userRole, setUserRole] = useState<UserRole>(null);
   const [privateCritiqueMode, setPrivateCritiqueMode] = useState(false);
 
   // Load saved role from localStorage on mount
   useEffect(() => {
-    const savedRole = localStorage.getItem("userRole");
-    if (savedRole) {
-      try {
-        // Validate that the saved role is a valid UserRole type
-        const validRoles: UserRole[] = [
-          "client",
-          "admin",
-          "adjudicator",
-          "studio-owner",
-          "studio_critique",
-        ];
-        if (validRoles.includes(savedRole as UserRole)) {
-          setUserRole(savedRole as UserRole);
-          console.log("Loaded role from localStorage:", savedRole);
-        } else {
-          console.warn("Invalid role found in localStorage:", savedRole);
-          localStorage.setItem("userRole", "client");
-        }
-      } catch (e) {
-        console.error("Error parsing saved role:", e);
-        localStorage.setItem("userRole", "client");
-      }
-    } else {
-      // If no role is saved, set default and save it
-      localStorage.setItem("userRole", "client");
-      console.log("No role found in localStorage, setting default: client");
-    }
-  }, []);
+    const updateRole = async () => {
+      const { data: authData } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", user?.id)
+        .single();
 
-  // Save userRole to localStorage when it changes
-  useEffect(() => {
-    console.log("AppContext: userRole changed to", userRole);
-    localStorage.setItem("userRole", userRole);
-  }, [userRole]);
+      const savedRole: UserRole = authData?.role;
+      if (savedRole) {
+        try {
+          // Validate that the saved role is a valid UserRole type
+          const validRoles: UserRole[] = [
+            "client",
+            "admin",
+            "adjudicator",
+            "studio-owner",
+            "studio_critique",
+          ];
+          if (validRoles.includes(savedRole as UserRole)) {
+            setUserRole(savedRole as UserRole);
+            console.log("Loaded role from localStorage:", savedRole);
+          } else {
+            console.warn("Invalid role found in localStorage:", savedRole);
+          }
+        } catch (e) {
+          console.error("Error parsing saved role:", e);
+        }
+      } else {
+        // If no role is saved, set default and save it
+        // localStorage.setItem("userRole", "client");
+        console.log("No role found in localStorage, setting default: client");
+      }
+    };
+    if (user && user.id) {
+      updateRole();
+    }
+  }, [user]);
 
   const value = {
     user,

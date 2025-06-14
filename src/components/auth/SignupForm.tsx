@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { signUpWithEmail, signUpWithGoogle } from "@/lib/auth";
 import { AlertCircle } from "lucide-react";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function SignupForm() {
   const navigate = useNavigate();
@@ -15,6 +15,9 @@ export function SignupForm() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const role = searchParams.get("role");
+  localStorage.setItem("pendingRole", role || "client");
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -37,7 +40,7 @@ export function SignupForm() {
     setIsGoogleLoading(true);
 
     try {
-      const { success, error } = await signUpWithGoogle();
+      const { success, error } = await signUpWithGoogle(role);
 
       if (!success || error) {
         throw error || new Error("Failed to sign up with Google");

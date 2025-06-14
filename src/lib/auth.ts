@@ -122,7 +122,7 @@ export async function resetPassword(email: string) {
 /**
  * Sign up/in with Google OAuth
  */
-export async function signUpWithGoogle() {
+export async function signUpWithGoogle(role: string) {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -165,7 +165,7 @@ export async function handleOAuthUserCreation(user: any) {
           user.user_metadata?.full_name ||
           user.user_metadata?.name ||
           user.email,
-        role: "client",
+        role: localStorage.getItem("pendingRole") || "client",
         is_verified: true, // OAuth users are automatically verified
         avatar_url: user.user_metadata?.avatar_url,
       });

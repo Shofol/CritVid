@@ -8,7 +8,7 @@ const ConnectionTestPage = React.lazy(() => import("@/pages/ConnectionTest"));
 const Contact = React.lazy(() => import("@/pages/Contact"));
 const CritiquePreview = React.lazy(() => import("@/pages/CritiquePreview"));
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
-const DashboardSelector = React.lazy(() => import("@/pages/DashboardSelector"));
+// const DashboardSelector = React.lazy(() => import("@/pages/DashboardSelector"));
 const EmailVerification = React.lazy(() => import("@/pages/EmailVerification"));
 const FindAdjudicator = React.lazy(() => import("@/pages/FindAdjudicator"));
 const ForgotPassword = React.lazy(() => import("@/pages/ForgotPassword"));
@@ -25,7 +25,7 @@ const PrivateCritique = React.lazy(() => import("@/pages/PrivateCritique"));
 const Profile = React.lazy(() => import("@/pages/Profile"));
 const ResetPassword = React.lazy(() => import("@/pages/ResetPassword"));
 const Reviews = React.lazy(() => import("@/pages/Reviews"));
-const RoleSelection = React.lazy(() => import("@/pages/RoleSelection"));
+// const RoleSelection = React.lazy(() => import("@/pages/RoleSelection"));
 const Signup = React.lazy(() => import("@/pages/Signup"));
 const Terms = React.lazy(() => import("@/pages/Terms"));
 const ThankYou = React.lazy(() => import("@/pages/ThankYou"));
@@ -533,7 +533,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
+      {/* <Route
         path="/role-selection"
         element={
           <ProtectedRoute>
@@ -542,8 +542,8 @@ function App() {
             </Suspense>
           </ProtectedRoute>
         }
-      />
-      <Route
+      /> */}
+      {/* <Route
         path="/dashboard-selector"
         element={
           <ProtectedRoute>
@@ -552,7 +552,7 @@ function App() {
             </Suspense>
           </ProtectedRoute>
         }
-      />
+      /> */}
       <Route
         path="/private-critique"
         element={
@@ -730,7 +730,7 @@ function App() {
       <Route
         path="/adjudicator/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <AdjudicatorDashboard />
             </Suspense>
@@ -740,7 +740,7 @@ function App() {
       <Route
         path="/adjudicator/pending-critiques"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <PendingCritiques />
             </Suspense>
@@ -750,7 +750,7 @@ function App() {
       <Route
         path="/adjudicator/completed-critiques"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <CompletedCritiques />
             </Suspense>
@@ -760,7 +760,7 @@ function App() {
       <Route
         path="/adjudicator/payments"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <AdjudicatorPayments />
             </Suspense>
@@ -770,7 +770,7 @@ function App() {
       <Route
         path="/adjudicator/critique-editor/:id"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <PlaybackTrackerPageFixed />
             </Suspense>
@@ -780,7 +780,7 @@ function App() {
       <Route
         path="/adjudicator/profile"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <ProfileEditor />
             </Suspense>
@@ -790,7 +790,7 @@ function App() {
       <Route
         path="/adjudicator/application-status"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <ApplicationStatus />
             </Suspense>
@@ -800,7 +800,7 @@ function App() {
       <Route
         path="/adjudicator/apply"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <Apply />
             </Suspense>
@@ -810,7 +810,7 @@ function App() {
       <Route
         path="/adjudicator/support"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <AdjudicatorSupport />
             </Suspense>
