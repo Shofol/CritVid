@@ -6,7 +6,8 @@ import { supabase } from "./supabase";
 export async function signUpWithEmail(
   email: string,
   password: string,
-  fullName: string
+  fullName: string,
+  role: string
 ) {
   try {
     const { data, error } = await supabase.auth.signUp({
@@ -28,7 +29,7 @@ export async function signUpWithEmail(
         id: data.user.id,
         email: data.user.email,
         full_name: fullName,
-        role: "client",
+        role: role,
         is_verified: false,
       });
     }
@@ -122,7 +123,7 @@ export async function resetPassword(email: string) {
 /**
  * Sign up/in with Google OAuth
  */
-export async function signUpWithGoogle(role: string) {
+export async function signUpWithGoogle() {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -147,7 +148,10 @@ export async function signUpWithGoogle(role: string) {
  * Handle OAuth user creation in database
  * This should be called when a user signs in with OAuth for the first time
  */
-export async function handleOAuthUserCreation(user: any) {
+export async function handleOAuthUserCreation(user: any): Promise<{
+  success: boolean;
+  error?: Error;
+}> {
   try {
     // Check if user already exists in our users table
     const { data: existingUser } = await supabase

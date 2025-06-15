@@ -77,6 +77,9 @@ const CompletedCritiques = React.lazy(
 const AdjudicatorDashboard = React.lazy(
   () => import("@/pages/adjudicator/Dashboard")
 );
+
+const AdjudicatorApply = React.lazy(() => import("@/pages/adjudicator/Apply"));
+
 const AdjudicatorPayments = React.lazy(
   () => import("@/pages/adjudicator/Payments")
 );
@@ -727,6 +730,17 @@ function App() {
       />
 
       {/* Adjudicator routes */}
+      <Route
+        path="/adjudicator/apply"
+        element={
+          <ProtectedRoute adjudicatorOnly>
+            <Suspense fallback={<PageLoader />}>
+              <AdjudicatorApply />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/adjudicator/dashboard"
         element={

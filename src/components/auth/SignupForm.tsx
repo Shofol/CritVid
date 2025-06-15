@@ -40,7 +40,7 @@ export function SignupForm() {
     setIsGoogleLoading(true);
 
     try {
-      const { success, error } = await signUpWithGoogle(role);
+      const { success, error } = await signUpWithGoogle();
 
       if (!success || error) {
         throw error || new Error("Failed to sign up with Google");
@@ -80,7 +80,8 @@ export function SignupForm() {
       const { success, error, data } = await signUpWithEmail(
         formData.email,
         formData.password,
-        formData.fullName
+        formData.fullName,
+        role
       );
 
       if (!success || error) {

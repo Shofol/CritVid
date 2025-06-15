@@ -1,4 +1,4 @@
-import { signOut as authSignOut, handleOAuthUserCreation } from "@/lib/auth";
+import { signOut as authSignOut } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
@@ -101,21 +101,21 @@ export const useAuth = () => {
           clearTimeout(loadingTimeout);
 
           // Handle OAuth user creation asynchronously without blocking
-          if (event === "SIGNED_IN" && session?.user) {
-            const isOAuthUser =
-              session.user.app_metadata?.provider &&
-              session.user.app_metadata.provider !== "email";
+          // if (event === "SIGNED_IN" && session?.user) {
+          //   const isOAuthUser =
+          //     session.user.app_metadata?.provider &&
+          //     session.user.app_metadata.provider !== "email";
 
-            if (isOAuthUser) {
-              // Don't await this - let it run in background
-              handleOAuthUserCreation(session.user).catch((error) => {
-                console.error(
-                  "OAuth user creation failed (non-blocking):",
-                  error
-                );
-              });
-            }
-          }
+          //   if (isOAuthUser) {
+          //     // Don't await this - let it run in background
+          //     handleOAuthUserCreation(session.user).catch((error) => {
+          //       console.error(
+          //         "OAuth user creation failed (non-blocking):",
+          //         error
+          //       );
+          //     });
+          //   }
+          // }
         } catch (error) {
           console.error("Error in auth state change handler:", error);
           if (mounted) {

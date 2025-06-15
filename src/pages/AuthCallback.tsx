@@ -1,11 +1,15 @@
 import { supabase } from "@/lib/supabase";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useApp } from "../contexts/AppContext";
+import { handleOAuthUserCreation } from "../lib/auth";
+import { UserRole } from "../types/navigation";
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { setUserRole } = useApp();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -20,13 +24,25 @@ const AuthCallback: React.FC = () => {
         if (data.session?.user) {
           // OAuth user creation is now handled by the useAuth hook automatically
 
-          // Get the return URL from sessionStorage or default to dashboard
-          const returnUrl =
-            sessionStorage.getItem("authReturnUrl") || "/dashboard";
-          sessionStorage.removeItem("authReturnUrl"); // Clean up
+          const { success, error: creationError } =
+            await handleOAuthUserCreation(data.session.user);
 
-          // Redirect to intended destination
-          navigate(returnUrl, { replace: true });
+          if (!success) {
+            throw new Error(creationError?.message);
+          }
+
+          setUserRole(localStorage.getItem("pendingRole") as UserRole);
+
+          setTimeout(() => {
+            localStorage.removeItem("pendingRole");
+            // Get the return URL from sessionStorage or default to dashboard
+            const returnUrl =
+              sessionStorage.getItem("authReturnUrl") || "/dashboard";
+            sessionStorage.removeItem("authReturnUrl"); // Clean up
+
+            // Redirect to intended destination
+            navigate(returnUrl, { replace: true });
+          }, 1000);
         } else {
           // No session found, redirect to login
           navigate("/login", { replace: true });
@@ -45,7 +61,7 @@ const AuthCallback: React.FC = () => {
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, []);
 
   if (error) {
     return (
