@@ -117,13 +117,10 @@ const ViewCritique = React.lazy(() => import("@/pages/client/ViewCritique"));
 
 // Demo pages
 const EmailDemo = React.lazy(() => import("@/pages/EmailDemo"));
-const MuxVideoDemo = React.lazy(() => import("@/pages/MuxVideoDemo"));
-const ScreenRecordingDemo = React.lazy(
-  () => import("@/pages/ScreenRecordingDemo")
-);
 
 // Components - Keep auth components as static imports since they're critical
 import AuthDebugger from "@/components/auth/AuthDebugger";
+import { EmailVerificationCallback } from "@/components/auth/EmailVerificationCallback";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PublicRoute from "@/components/auth/PublicRoute";
 
@@ -279,7 +276,7 @@ function App() {
         element={
           <PublicRoute>
             <Suspense fallback={<PageLoader />}>
-              <EmailVerification />
+              <EmailVerificationCallback />
             </Suspense>
           </PublicRoute>
         }
@@ -298,32 +295,13 @@ function App() {
       />
 
       {/* Demo routes - public */}
-      <Route
-        path="/mux-demo"
-        element={
-          <PublicRoute>
-            <Suspense fallback={<PageLoader />}>
-              <MuxVideoDemo />
-            </Suspense>
-          </PublicRoute>
-        }
-      />
+
       <Route
         path="/email-demo"
         element={
           <PublicRoute>
             <Suspense fallback={<PageLoader />}>
               <EmailDemo />
-            </Suspense>
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/screen-recording-demo"
-        element={
-          <PublicRoute>
-            <Suspense fallback={<PageLoader />}>
-              <ScreenRecordingDemo />
             </Suspense>
           </PublicRoute>
         }

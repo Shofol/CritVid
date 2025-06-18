@@ -1,73 +1,73 @@
 import {
-  LayoutDashboard,
-  Upload,
-  Video,
-  Users,
-  Settings,
-  Mail,
-  FileVideo,
   BarChart3,
   Building,
-  User,
-  CreditCard,
-  MessageSquare,
-  HelpCircle,
-  Clock,
   CheckCircle,
-  Edit3,
-  UserCheck,
-  FileText,
-  Headphones,
-  Shield,
-  Zap,
-  Database,
+  Clock,
   Cloud,
-  FolderOpen,
-  Film
-} from 'lucide-react';
+  CreditCard,
+  Database,
+  Edit3,
+  FileVideo,
+  Headphones,
+  HelpCircle,
+  LayoutDashboard,
+  Mail,
+  Settings,
+  Upload,
+  User,
+  UserCheck,
+  Users,
+  Video,
+  Zap,
+} from "lucide-react";
 
-import { NavigationItem, NavItem, NavSection, UserRole } from '@/types/navigation';
+import {
+  NavigationItem,
+  NavItem,
+  NavSection,
+  UserRole,
+} from "@/types/navigation";
 
 // Client navigation items - Updated with separate My Videos and My Critiques
 export const clientNavigationItems: NavigationItem[] = [
   {
-    title: 'Dashboard',
-    href: '/client/dashboard',
+    title: "Dashboard",
+    href: "/client/dashboard",
     icon: LayoutDashboard,
   },
+  // {
+  //   title: '📁 My Videos',
+  //   href: '/client/dashboard?tab=videos',
+  //   icon: FolderOpen,
+  // },
+  // {
+  //   title: '🎥 My Critiques',
+  //   href: '/client/dashboard?tab=critiques',
+  //   icon: Film,
+  // },
   {
-    title: '📁 My Videos',
-    href: '/client/dashboard?tab=videos',
-    icon: FolderOpen,
-  },
-  {
-    title: '🎥 My Critiques',
-    href: '/client/dashboard?tab=critiques',
-    icon: Film,
-  },
-  {
-    title: 'Upload Video',
-    href: '/upload-video',
+    title: "Upload Video",
+    href: "/upload-video",
     icon: Upload,
   },
   {
-    title: 'Find Adjudicator',
-    href: '/find-adjudicator',
+    title: "Find Adjudicator",
+    href: "/find-adjudicator",
     icon: Users,
   },
   {
-    title: 'Billing',
-    href: '/client/billing',
+    title: "Billing",
+    href: "/client/billing",
     icon: CreditCard,
   },
   {
-    title: 'My Profile',
-    href: '/profile',
+    title: "My Profile",
+    href: "/profile",
     icon: User,
   },
   {
-    title: 'Help & Contact',
-    href: '/help',
+    title: "Help & Contact",
+    href: "/help",
     icon: HelpCircle,
   },
 ];
@@ -75,73 +75,73 @@ export const clientNavigationItems: NavigationItem[] = [
 // Admin navigation items
 export const adminNavigationItems: NavigationItem[] = [
   {
-    title: 'Dashboard',
-    href: '/admin/dashboard',
+    title: "Dashboard",
+    href: "/admin/dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: 'User Management',
-    href: '/admin/users',
+    title: "User Management",
+    href: "/admin/users",
     icon: Users,
   },
   {
-    title: 'Adjudicators',
-    href: '/admin/adjudicators',
+    title: "Adjudicators",
+    href: "/admin/adjudicators",
     icon: UserCheck,
   },
   {
-    title: 'Client Management',
-    href: '/admin/clients',
+    title: "Client Management",
+    href: "/admin/clients",
     icon: Building,
   },
   {
-    title: 'Studio Owners',
-    href: '/admin/studio-owners',
+    title: "Studio Owners",
+    href: "/admin/studio-owners",
     icon: Building,
   },
   {
-    title: 'Video Reviews',
-    href: '/admin/video-reviews',
+    title: "Video Reviews",
+    href: "/admin/video-reviews",
     icon: FileVideo,
   },
   {
-    title: 'Email Templates',
-    href: '/admin/email-templates',
+    title: "Email Templates",
+    href: "/admin/email-templates",
     icon: Mail,
   },
   {
-    title: 'Test Email',
-    href: '/admin/test-email',
+    title: "Test Email",
+    href: "/admin/test-email",
     icon: Mail,
   },
   {
-    title: 'Statistics',
-    href: '/admin/stats',
+    title: "Statistics",
+    href: "/admin/stats",
     icon: BarChart3,
   },
   {
-    title: 'Payment Reports',
-    href: '/admin/payments',
+    title: "Payment Reports",
+    href: "/admin/payments",
     icon: CreditCard,
   },
   {
-    title: 'Automation',
-    href: '/admin/automation',
+    title: "Automation",
+    href: "/admin/automation",
     icon: Zap,
   },
   {
-    title: 'Storage Management',
-    href: '/admin/storage',
+    title: "Storage Management",
+    href: "/admin/storage",
     icon: Cloud,
   },
   {
-    title: 'System Settings',
-    href: '/admin/system',
+    title: "System Settings",
+    href: "/admin/system",
     icon: Database,
   },
   {
-    title: 'Settings',
-    href: '/admin/settings',
+    title: "Settings",
+    href: "/admin/settings",
     icon: Settings,
   },
 ];
@@ -149,38 +149,38 @@ export const adminNavigationItems: NavigationItem[] = [
 // Adjudicator navigation items
 export const adjudicatorNavigationItems: NavigationItem[] = [
   {
-    title: 'Dashboard',
-    href: '/adjudicator/dashboard',
+    title: "Dashboard",
+    href: "/adjudicator/dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: 'Pending Critiques',
-    href: '/adjudicator/pending-critiques',
+    title: "Pending Critiques",
+    href: "/adjudicator/pending-critiques",
     icon: Clock,
   },
   {
-    title: 'Completed Critiques',
-    href: '/adjudicator/completed-critiques',
+    title: "Completed Critiques",
+    href: "/adjudicator/completed-critiques",
     icon: CheckCircle,
   },
   {
-    title: 'Payments',
-    href: '/adjudicator/payments',
+    title: "Payments",
+    href: "/adjudicator/payments",
     icon: CreditCard,
   },
   {
-    title: 'Video Editor',
-    href: '/video-editor',
+    title: "Video Editor",
+    href: "/video-editor",
     icon: Edit3,
   },
   {
-    title: 'My Profile',
-    href: '/profile',
+    title: "My Profile",
+    href: "/profile",
     icon: User,
   },
   {
-    title: 'Support',
-    href: '/adjudicator/support',
+    title: "Support",
+    href: "/adjudicator/support",
     icon: Headphones,
   },
 ];
@@ -188,18 +188,18 @@ export const adjudicatorNavigationItems: NavigationItem[] = [
 // Studio Critique navigation items
 export const studioCritiqueNavigationItems: NavigationItem[] = [
   {
-    title: 'Upload Video',
-    href: '/upload-video',
+    title: "Upload Video",
+    href: "/upload-video",
     icon: Upload,
   },
   {
-    title: 'Edit Video',
-    href: '/video-editor',
+    title: "Edit Video",
+    href: "/video-editor",
     icon: Edit3,
   },
   {
-    title: 'My Profile',
-    href: '/profile',
+    title: "My Profile",
+    href: "/profile",
     icon: User,
   },
 ];
@@ -207,23 +207,23 @@ export const studioCritiqueNavigationItems: NavigationItem[] = [
 // Studio Owner navigation items
 export const studioOwnerNavigationItems: NavigationItem[] = [
   {
-    title: 'Dashboard',
-    href: '/studio/dashboard',
+    title: "Dashboard",
+    href: "/studio/dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: 'Saved Critiques',
-    href: '/studio/saved-critiques',
+    title: "Saved Critiques",
+    href: "/studio/saved-critiques",
     icon: Video,
   },
   {
-    title: 'Team Management',
-    href: '/studio/team',
+    title: "Team Management",
+    href: "/studio/team",
     icon: Users,
   },
   {
-    title: 'Profile',
-    href: '/profile',
+    title: "Profile",
+    href: "/profile",
     icon: User,
   },
 ];
@@ -231,79 +231,81 @@ export const studioOwnerNavigationItems: NavigationItem[] = [
 // Default user navigation items (fallback)
 export const userNavigationItems: NavigationItem[] = [
   {
-    title: 'Dashboard',
-    href: '/user-dashboard',
+    title: "Dashboard",
+    href: "/user-dashboard",
     icon: LayoutDashboard,
   },
   {
-    title: 'Video Library',
-    href: '/video-library',
+    title: "Video Library",
+    href: "/video-library",
     icon: Video,
   },
   {
-    title: 'Upload Video',
-    href: '/upload-video',
+    title: "Upload Video",
+    href: "/upload-video",
     icon: Upload,
   },
   {
-    title: 'Profile',
-    href: '/profile',
+    title: "Profile",
+    href: "/profile",
     icon: User,
   },
   {
-    title: 'Help & Support',
-    href: '/help',
+    title: "Help & Support",
+    href: "/help",
     icon: HelpCircle,
   },
 ];
 
 // Helper function to convert NavigationItem[] to NavSection[]
 export function getNavigationByRole(role: UserRole): NavSection[] {
-  console.log('getNavigationByRole called with role:', role);
-  
+  console.log("getNavigationByRole called with role:", role);
+
   let items: NavigationItem[] = [];
-  
+
   switch (role) {
-    case 'admin':
+    case "admin":
       items = adminNavigationItems;
-      console.log('Using admin navigation items');
+      console.log("Using admin navigation items");
       break;
-    case 'adjudicator':
+    case "adjudicator":
       items = adjudicatorNavigationItems;
-      console.log('Using adjudicator navigation items');
+      console.log("Using adjudicator navigation items");
       break;
-    case 'studio-owner':
+    case "studio-owner":
       items = studioOwnerNavigationItems;
-      console.log('Using studio-owner navigation items');
+      console.log("Using studio-owner navigation items");
       break;
-    case 'studio_critique':
+    case "studio_critique":
       items = studioCritiqueNavigationItems;
-      console.log('Using studio_critique navigation items');
+      console.log("Using studio_critique navigation items");
       break;
-    case 'client':
+    case "client":
       items = clientNavigationItems;
-      console.log('Using client navigation items');
+      console.log("Using client navigation items");
       break;
     default:
       items = userNavigationItems;
-      console.log('Using default navigation items');
+      console.log("Using default navigation items");
   }
 
   // Convert NavigationItem[] to NavItem[]
-  const navItems: NavItem[] = items.map(item => {
+  const navItems: NavItem[] = items.map((item) => {
     return {
       name: item.title,
       path: item.href,
-      icon: 'layout-dashboard', // Use a default icon for all items
-      roles: [role]
+      icon: "layout-dashboard", // Use a default icon for all items
+      roles: [role],
     };
   });
 
-  const result = [{
-    title: role === 'admin' ? 'Admin' : 'Navigation',
-    items: navItems
-  }];
-  
-  console.log('Navigation sections result:', result);
+  const result = [
+    {
+      title: role === "admin" ? "Admin" : "Navigation",
+      items: navItems,
+    },
+  ];
+
+  console.log("Navigation sections result:", result);
   return result;
 }

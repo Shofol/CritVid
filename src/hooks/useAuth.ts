@@ -2,6 +2,8 @@ import { signOut as authSignOut } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
+import { useApp } from "../contexts/AppContext";
+import { UserRole } from "../types/navigation";
 
 interface AuthState {
   user: User | null;
@@ -15,6 +17,7 @@ export const useAuth = () => {
     session: null,
     loading: true,
   });
+  const { setUserRole } = useApp();
 
   useEffect(() => {
     let mounted = true;
@@ -57,6 +60,14 @@ export const useAuth = () => {
           });
           clearTimeout(loadingTimeout);
         }
+
+        const { data: userData } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", session?.user?.id)
+          .single();
+
+        setUserRole(userData?.role as UserRole);
       } catch (error) {
         console.error("Unexpected error getting initial session:", error);
         if (mounted) {
@@ -99,23 +110,6 @@ export const useAuth = () => {
             loading: false,
           });
           clearTimeout(loadingTimeout);
-
-          // Handle OAuth user creation asynchronously without blocking
-          // if (event === "SIGNED_IN" && session?.user) {
-          //   const isOAuthUser =
-          //     session.user.app_metadata?.provider &&
-          //     session.user.app_metadata.provider !== "email";
-
-          //   if (isOAuthUser) {
-          //     // Don't await this - let it run in background
-          //     handleOAuthUserCreation(session.user).catch((error) => {
-          //       console.error(
-          //         "OAuth user creation failed (non-blocking):",
-          //         error
-          //       );
-          //     });
-          //   }
-          // }
         } catch (error) {
           console.error("Error in auth state change handler:", error);
           if (mounted) {

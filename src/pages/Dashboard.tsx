@@ -14,7 +14,7 @@ const Dashboard: React.FC = () => {
         navigate("/admin/dashboard");
         break;
       case "adjudicator":
-        navigate("/adjudicator/dashboard");
+        navigate("/adjudicator/apply");
         break;
       case "studio_critique":
         navigate("/studio/dashboard");

@@ -1,3 +1,4 @@
+import { User } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 
 /**
@@ -16,23 +17,13 @@ export async function signUpWithEmail(
       options: {
         data: {
           full_name: fullName,
+          role: role,
         },
-        emailRedirectTo: `${window.location.origin}/email-verification`,
+        emailRedirectTo: `${window.location.origin}/verify-email`,
       },
     });
 
     if (error) throw error;
-
-    // Create a record in the users table
-    if (data.user) {
-      await supabase.from("users").insert({
-        id: data.user.id,
-        email: data.user.email,
-        full_name: fullName,
-        role: role,
-        is_verified: false,
-      });
-    }
 
     return { success: true, data };
   } catch (error) {
@@ -185,6 +176,38 @@ export async function handleOAuthUserCreation(user: any): Promise<{
     return { success: true };
   } catch (error) {
     console.error("OAuth user creation error:", error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Create user record after email verification
+ */
+export async function createUserAfterVerification(user: User) {
+  try {
+    // First check if user already exists
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", user.email)
+      .single();
+
+    // If user doesn't exist, create them
+    if (!existingUser) {
+      const { error } = await supabase.from("users").insert({
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata.full_name,
+        role: user.user_metadata.role,
+        is_verified: true,
+      });
+
+      if (error) throw error;
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("User creation error:", error);
     return { success: false, error };
   }
 }

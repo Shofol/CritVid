@@ -48,44 +48,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [privateCritiqueMode, setPrivateCritiqueMode] = useState(false);
 
-  // Load saved role from localStorage on mount
-  // useEffect(() => {
-  //   const updateRole = async () => {
-  //     const { data: authData } = await supabase
-  //       .from("users")
-  //       .select("role")
-  //       .eq("id", user?.id)
-  //       .single();
-
-  //     const savedRole: UserRole = authData?.role;
-  //     if (savedRole) {
-  //       try {
-  //         // Validate that the saved role is a valid UserRole type
-  //         const validRoles: UserRole[] = [
-  //           "client",
-  //           "admin",
-  //           "adjudicator",
-  //           "studio-owner",
-  //           "studio_critique",
-  //         ];
-  //         if (validRoles.includes(savedRole as UserRole)) {
-  //           setUserRole(savedRole as UserRole);
-  //         } else {
-  //           console.warn("Invalid role found", savedRole);
-  //         }
-  //       } catch (e) {
-  //         console.error("Error parsing saved role:", e);
-  //       }
-  //     } else {
-  //       updateRole();
-  //       console.log("No role found in localStorage, setting default: client");
-  //     }
-  //   };
-  //   if (user && user.id) {
-  //     updateRole();
-  //   }
-  // }, [user]);
-
   const value = {
     user,
     isLoading,

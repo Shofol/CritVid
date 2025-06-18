@@ -96,7 +96,7 @@ export function SignupForm() {
       // Redirect to verification page after a short delay
       setTimeout(() => {
         navigate("/email-verification", { state: { email: formData.email } });
-      }, 2000);
+      }, 1000);
     } catch (err: any) {
       setError(err.message || "An error occurred during signup");
     } finally {
