@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
-import { User, PaymentRecord } from '@/types/user';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { PaymentRecord, User } from "@/types/user";
+import React, { useState } from "react";
 
 interface UserPaymentProps {
   user: User;
@@ -18,12 +31,14 @@ const UserPayment: React.FC<UserPaymentProps> = ({ user, onUpdate }) => {
   const payment = user.payment || {
     history: [],
     accountCredit: 0,
-    payoutSplit: user.role === 'adjudicator' ? 60 : undefined,
-    payoutStatus: user.role === 'adjudicator' ? 'active' : undefined
+    payoutSplit: user.role === "adjudicator" ? 60 : undefined,
+    payoutStatus: user.role === "adjudicator" ? "active" : undefined,
   };
 
-  const [creditAmount, setCreditAmount] = useState<string>('20');
-  const [payoutSplit, setPayoutSplit] = useState<number[]>([payment.payoutSplit || 60]);
+  const [creditAmount, setCreditAmount] = useState<string>("20");
+  const [payoutSplit, setPayoutSplit] = useState<number[]>([
+    payment.payoutSplit || 60,
+  ]);
 
   const handleAddCredit = () => {
     const amount = parseFloat(creditAmount);
@@ -36,37 +51,37 @@ const UserPayment: React.FC<UserPaymentProps> = ({ user, onUpdate }) => {
         ...payment.history,
         {
           id: Date.now().toString(),
-          date: new Date().toISOString().split('T')[0],
+          date: new Date().toISOString().split("T")[0],
           amount: amount,
-          type: 'credit',
-          status: 'completed',
-          description: 'Manual credit by admin'
+          type: "credit",
+          status: "completed",
+          description: "Manual credit by admin",
         },
-        ...payment.history
-      ]
+        ...payment.history,
+      ],
     };
 
     onUpdate({ payment: newPayment });
-    setCreditAmount('20');
+    setCreditAmount("20");
   };
 
   const handleRefund = (paymentId: string) => {
-    const paymentToRefund = payment.history.find(p => p.id === paymentId);
-    if (!paymentToRefund || paymentToRefund.type === 'refund') return;
+    const paymentToRefund = payment.history.find((p) => p.id === paymentId);
+    if (!paymentToRefund || paymentToRefund.type === "refund") return;
 
     const newPayment = {
       ...payment,
       history: [
         {
           id: Date.now().toString(),
-          date: new Date().toISOString().split('T')[0],
+          date: new Date().toISOString().split("T")[0],
           amount: paymentToRefund.amount,
-          type: 'refund',
-          status: 'completed',
-          description: `Refund for payment ${paymentId}`
+          type: "refund",
+          status: "completed",
+          description: `Refund for payment ${paymentId}`,
         },
-        ...payment.history
-      ]
+        ...payment.history,
+      ],
     };
 
     onUpdate({ payment: newPayment });
@@ -77,18 +92,18 @@ const UserPayment: React.FC<UserPaymentProps> = ({ user, onUpdate }) => {
     onUpdate({
       payment: {
         ...payment,
-        payoutSplit: values[0]
-      }
+        payoutSplit: values[0],
+      },
     });
   };
 
   const togglePayoutStatus = () => {
-    const newStatus = payment.payoutStatus === 'active' ? 'paused' : 'active';
+    const newStatus = payment.payoutStatus === "active" ? "paused" : "active";
     onUpdate({
       payment: {
         ...payment,
-        payoutStatus: newStatus
-      }
+        payoutStatus: newStatus,
+      },
     });
   };
 
@@ -98,7 +113,7 @@ const UserPayment: React.FC<UserPaymentProps> = ({ user, onUpdate }) => {
         <CardHeader>
           <CardTitle>Account Credit</CardTitle>
           <CardDescription>
-            Current Balance: ${payment.accountCredit?.toFixed(2) || '0.00'}
+            Current Balance: ${payment.accountCredit?.toFixed(2) || "0.00"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -119,7 +134,7 @@ const UserPayment: React.FC<UserPaymentProps> = ({ user, onUpdate }) => {
         </CardContent>
       </Card>
 
-      {user.role === 'adjudicator' && (
+      {user.role === "adjudicator" && (
         <Card>
           <CardHeader>
             <CardTitle>Payout Settings</CardTitle>
@@ -133,7 +148,8 @@ const UserPayment: React.FC<UserPaymentProps> = ({ user, onUpdate }) => {
                 <div className="flex justify-between mb-2">
                   <Label>Payment Split</Label>
                   <span className="text-sm">
-                    Platform: {100 - payoutSplit[0]}% / Adjudicator: {payoutSplit[0]}%
+                    Platform: {100 - payoutSplit[0]}% / Adjudicator:{" "}
+                    {payoutSplit[0]}%
                   </span>
                 </div>
                 <Slider
@@ -145,19 +161,27 @@ const UserPayment: React.FC<UserPaymentProps> = ({ user, onUpdate }) => {
                   onValueChange={handlePayoutSplitChange}
                 />
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <div>
                   <h4 className="font-medium">Payout Status</h4>
                   <p className="text-sm text-muted-foreground">
-                    {payment.payoutStatus === 'active' ? 'Payouts are currently enabled' : 'Payouts are currently paused'}
+                    {payment.payoutStatus === "active"
+                      ? "Payouts are currently enabled"
+                      : "Payouts are currently paused"}
                   </p>
                 </div>
-                <Button 
-                  variant={payment.payoutStatus === 'active' ? 'destructive' : 'default'}
+                <Button
+                  variant={
+                    payment.payoutStatus === "active"
+                      ? "destructive"
+                      : "default"
+                  }
                   onClick={togglePayoutStatus}
                 >
-                  {payment.payoutStatus === 'active' ? 'Pause Payouts' : 'Enable Payouts'}
+                  {payment.payoutStatus === "active"
+                    ? "Pause Payouts"
+                    : "Enable Payouts"}
                 </Button>
               </div>
             </div>
@@ -195,9 +219,9 @@ const UserPayment: React.FC<UserPaymentProps> = ({ user, onUpdate }) => {
                       <PaymentStatusBadge status={record.status} />
                     </TableCell>
                     <TableCell>
-                      {record.type === 'purchase' && (
-                        <Button 
-                          variant="outline" 
+                      {record.type === "purchase" && (
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleRefund(record.id)}
                         >
@@ -210,7 +234,9 @@ const UserPayment: React.FC<UserPaymentProps> = ({ user, onUpdate }) => {
               </TableBody>
             </Table>
           ) : (
-            <p className="text-center text-muted-foreground py-4">No payment history available</p>
+            <p className="text-center text-muted-foreground py-4">
+              No payment history available
+            </p>
           )}
         </CardContent>
       </Card>
@@ -224,14 +250,42 @@ interface PaymentTypeBadgeProps {
 
 const PaymentTypeBadge: React.FC<PaymentTypeBadgeProps> = ({ type }) => {
   switch (type) {
-    case 'purchase':
-      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Purchase</Badge>;
-    case 'refund':
-      return <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">Refund</Badge>;
-    case 'payout':
-      return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Payout</Badge>;
-    case 'credit':
-      return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Credit</Badge>;
+    case "purchase":
+      return (
+        <Badge
+          variant="outline"
+          className="bg-blue-50 text-blue-700 border-blue-200"
+        >
+          Purchase
+        </Badge>
+      );
+    case "refund":
+      return (
+        <Badge
+          variant="outline"
+          className="bg-amber-50 text-amber-700 border-amber-200"
+        >
+          Refund
+        </Badge>
+      );
+    case "payout":
+      return (
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200"
+        >
+          Payout
+        </Badge>
+      );
+    case "credit":
+      return (
+        <Badge
+          variant="outline"
+          className="bg-purple-50 text-purple-700 border-purple-200"
+        >
+          Credit
+        </Badge>
+      );
     default:
       return <Badge variant="outline">{type}</Badge>;
   }
@@ -243,12 +297,33 @@ interface PaymentStatusBadgeProps {
 
 const PaymentStatusBadge: React.FC<PaymentStatusBadgeProps> = ({ status }) => {
   switch (status) {
-    case 'completed':
-      return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Completed</Badge>;
-    case 'pending':
-      return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Pending</Badge>;
-    case 'failed':
-      return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Failed</Badge>;
+    case "completed":
+      return (
+        <Badge
+          variant="outline"
+          className="bg-green-50 text-green-700 border-green-200"
+        >
+          Completed
+        </Badge>
+      );
+    case "pending":
+      return (
+        <Badge
+          variant="outline"
+          className="bg-yellow-50 text-yellow-700 border-yellow-200"
+        >
+          Pending
+        </Badge>
+      );
+    case "failed":
+      return (
+        <Badge
+          variant="outline"
+          className="bg-red-50 text-red-700 border-red-200"
+        >
+          Failed
+        </Badge>
+      );
     default:
       return <Badge variant="outline">{status}</Badge>;
   }

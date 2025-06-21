@@ -3,24 +3,14 @@ import { uploadRecordedVideo } from "@/lib/storage";
 import { Highlighter, Play } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useUnifiedCritiqueScreenRecording } from "../hooks/useUnifiedCritiqueScreenRecording";
+import { DrawAction } from "../types/critiqueTypes";
 import DrawingCanvasFixed from "./DrawingCanvasFixed";
 import UnifiedCritiqueControls from "./UnifiedCritiqueControls";
 import VideoControls from "./VideoControls";
 import { Button } from "./ui/button";
 
-interface DrawAction {
-  path: { x: number; y: number }[];
-  timestamp: number;
-  startTime: number;
-  endTime: number;
-  color: string;
-  width: number;
-  id?: string;
-}
-
 interface PlaybackTrackerProps {
   videoUrl: string;
-  setRecordedAudioUrl: (url: string | null) => void;
   drawActions: DrawAction[];
   setDrawActions: (actions: DrawAction[]) => void;
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -28,7 +18,6 @@ interface PlaybackTrackerProps {
 
 const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
   videoUrl,
-  setRecordedAudioUrl,
   drawActions,
   setDrawActions,
   videoRef,
@@ -54,9 +43,9 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
 
   const [videoPlaying, setVideoPlaying] = useState(false);
 
-  useEffect(() => {
-    setRecordedAudioUrl(recordedVideoUrl);
-  }, [recordedVideoUrl, setRecordedAudioUrl]);
+  // useEffect(() => {
+  //   setRecordedAudioUrl(recordedVideoUrl);
+  // }, [recordedVideoUrl, setRecordedAudioUrl]);
 
   const effectiveVideoUrl =
     isPlaybackMode && recordedVideoUrl
@@ -180,7 +169,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
       toast({
         title: "Upload Failed",
         description: "No recorded video available to upload.",
-        variant: "destructive" as const
+        variant: "destructive" as const,
       });
       return;
     }
@@ -194,14 +183,15 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
       toast({
         title: "Upload Successful",
         description: `Video uploaded to cloud storage at ${filePath}`,
-        variant: "default"
+        variant: "default",
       });
     } catch (error) {
       console.error("❌ Failed to upload video:", error);
       toast({
         title: "Upload Failed",
-        description: "Failed to upload video to cloud storage. Please try again.",
-        variant: "destructive" as const
+        description:
+          "Failed to upload video to cloud storage. Please try again.",
+        variant: "destructive" as const,
       });
     }
   };
@@ -269,7 +259,9 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
               <Button
                 onClick={handleDrawingToggle}
                 variant={isDrawingMode ? "default" : "outline"}
-                className={`absolute top-5 right-5 z-20 rounded-full h-10 w-10 p-0 ${isDrawingMode ? "bg-blue-600 hover:bg-blue-700" : ""}`}
+                className={`absolute top-5 right-5 z-20 rounded-full h-10 w-10 p-0 ${
+                  isDrawingMode ? "bg-blue-600 hover:bg-blue-700" : ""
+                }`}
                 disabled={!isRecording}
               >
                 <Highlighter className="h-4 w-4" />

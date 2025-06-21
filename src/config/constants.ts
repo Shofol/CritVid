@@ -5,3 +5,15 @@ export const CREATE_ADJUDICATOR_PROFILE_FUNCTION = `${
 export const GET_ADJUDICATORS_FUNCTION = `${
   import.meta.env.VITE_SUPABASE_URL
 }/functions/v1/get-approved-adjudicators`;
+
+export const ASSIGN_CRITIQUE_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/assign-critique`;
+
+export const GET_CRITIQUES_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/get-critiques`;
+
+export const GET_CRITIQUE_BY_ID_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/get-critique-by-id`;

@@ -8,12 +8,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { VideoSelectionModal } from "@/components/video-library/VideoSelectionModal";
-import { mockData } from "@/data/mockData";
+// import { mockData } from "@/data/mockData";
 import { getAdjudicators } from "@/services/adjudicatorService";
 import { Adjudicator } from "@/types/adjudicator";
-import { Award, Eye, Loader2, MapPin, Send, Star } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import {
+  Award,
+  Eye,
+  Loader2,
+  MapPin,
+  Search,
+  Send,
+  Star,
+  X,
+} from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 const FindAdjudicator: React.FC = () => {
@@ -28,7 +46,92 @@ const FindAdjudicator: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDanceStyle, setSelectedDanceStyle] = useState("all");
+  const [selectedRating, setSelectedRating] = useState("all");
+  const [selectedLocation, setSelectedLocation] = useState("all");
+  const [showFilters, setShowFilters] = useState(false);
+
   const videoId = searchParams.get("video");
+
+  // Get unique dance styles, locations for filter options
+  const danceStyles = useMemo(() => {
+    const styles = new Set<string>();
+    adjudicators.forEach((adjudicator) => {
+      adjudicator.dance_styles.forEach((style) => styles.add(style.name));
+    });
+    return Array.from(styles).sort();
+  }, [adjudicators]);
+
+  const locations = useMemo(() => {
+    const locs = new Set<string>();
+    adjudicators.forEach((adjudicator) => {
+      locs.add(adjudicator.location);
+    });
+    return Array.from(locs).sort();
+  }, [adjudicators]);
+
+  // Filter adjudicators based on search and filter criteria
+  const filteredAdjudicators = useMemo(() => {
+    return adjudicators.filter((adjudicator) => {
+      // Name search
+      if (
+        searchTerm &&
+        !adjudicator.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Dance style filter
+      if (
+        selectedDanceStyle !== "all" &&
+        !adjudicator.dance_styles.some(
+          (style) => style.name === selectedDanceStyle
+        )
+      ) {
+        return false;
+      }
+
+      // Rating filter
+      if (selectedRating !== "all") {
+        const minRating = parseFloat(selectedRating);
+        if (adjudicator.rating < minRating) {
+          return false;
+        }
+      }
+
+      // Location filter
+      if (
+        selectedLocation !== "all" &&
+        adjudicator.location !== selectedLocation
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    adjudicators,
+    searchTerm,
+    selectedDanceStyle,
+    selectedRating,
+    selectedLocation,
+  ]);
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedDanceStyle("all");
+    setSelectedRating("all");
+    setSelectedLocation("all");
+  };
+
+  const hasActiveFilters =
+    searchTerm ||
+    selectedDanceStyle !== "all" ||
+    selectedRating !== "all" ||
+    selectedLocation !== "all";
 
   useEffect(() => {
     const fetchAdjudicators = async () => {
@@ -113,15 +216,183 @@ const FindAdjudicator: React.FC = () => {
           )}
         </div>
 
-        {adjudicators.length === 0 ? (
+        {/* Search and Filter Section */}
+        <div className="mb-6 space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search adjudicators by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4"
+            />
+          </div>
+
+          {/* Filter Toggle and Active Filters */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2"
+            >
+              <span>Filters</span>
+              {hasActiveFilters && (
+                <Badge variant="secondary" className="ml-1">
+                  {
+                    [
+                      searchTerm,
+                      selectedDanceStyle !== "all" ? selectedDanceStyle : null,
+                      selectedRating !== "all" ? selectedRating : null,
+                      selectedLocation !== "all" ? selectedLocation : null,
+                    ].filter(Boolean).length
+                  }
+                </Badge>
+              )}
+            </Button>
+
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Clear all
+              </Button>
+            )}
+          </div>
+
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap gap-2">
+              {searchTerm && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Name: {searchTerm}
+                  <X
+                    className="w-3 h-3 cursor-pointer"
+                    onClick={() => setSearchTerm("")}
+                  />
+                </Badge>
+              )}
+              {selectedDanceStyle !== "all" && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Style: {selectedDanceStyle}
+                  <X
+                    className="w-3 h-3 cursor-pointer"
+                    onClick={() => setSelectedDanceStyle("all")}
+                  />
+                </Badge>
+              )}
+              {selectedRating !== "all" && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Rating: {selectedRating}+
+                  <X
+                    className="w-3 h-3 cursor-pointer"
+                    onClick={() => setSelectedRating("all")}
+                  />
+                </Badge>
+              )}
+              {selectedLocation !== "all" && (
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  Location: {selectedLocation}
+                  <X
+                    className="w-3 h-3 cursor-pointer"
+                    onClick={() => setSelectedLocation("all")}
+                  />
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Filter Options */}
+          {showFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="space-y-2">
+                <Label htmlFor="dance-style">Dance Style</Label>
+                <Select
+                  value={selectedDanceStyle}
+                  onValueChange={setSelectedDanceStyle}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All styles" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All styles</SelectItem>
+                    {danceStyles.map((style) => (
+                      <SelectItem key={style} value={style}>
+                        {style}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="rating">Minimum Rating</Label>
+                <Select
+                  value={selectedRating}
+                  onValueChange={setSelectedRating}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Any rating" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Any rating</SelectItem>
+                    <SelectItem value="4.5">4.5+ stars</SelectItem>
+                    <SelectItem value="4.0">4.0+ stars</SelectItem>
+                    <SelectItem value="3.5">3.5+ stars</SelectItem>
+                    <SelectItem value="3.0">3.0+ stars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <Select
+                  value={selectedLocation}
+                  onValueChange={setSelectedLocation}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All locations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All locations</SelectItem>
+                    {locations.map((location) => (
+                      <SelectItem key={location} value={location}>
+                        {location}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          {/* Results Count */}
+          <div className="text-sm text-gray-600">
+            Showing {filteredAdjudicators.length} of {adjudicators.length}{" "}
+            adjudicators
+          </div>
+        </div>
+
+        {filteredAdjudicators.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600 mb-4">
-              No adjudicators available at the moment.
+              {hasActiveFilters
+                ? "No adjudicators match your search criteria. Try adjusting your filters."
+                : "No adjudicators available at the moment."}
             </p>
+            {hasActiveFilters && (
+              <Button variant="outline" onClick={clearFilters}>
+                Clear all filters
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {adjudicators.map((adjudicator) => (
+            {filteredAdjudicators.map((adjudicator) => (
               <Card
                 key={adjudicator.id}
                 className="hover:shadow-lg transition-shadow"
@@ -314,7 +585,7 @@ const FindAdjudicator: React.FC = () => {
           <VideoSelectionModal
             isOpen={showVideoSelection}
             onClose={() => setShowVideoSelection(false)}
-            videos={mockData.videos}
+            // videos={mockData.videos}
             selectedAdjudicator={selectedAdjudicator}
           />
         )}

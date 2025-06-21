@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { AdjudicatorsResponse } from "@/types/adjudicator";
+import { Adjudicator, AdjudicatorsResponse } from "@/types/adjudicator";
 import { GET_ADJUDICATORS_FUNCTION } from "../config/constants";
 
 export const getAdjudicators = async (): Promise<AdjudicatorsResponse> => {
@@ -30,4 +30,30 @@ export const getAdjudicators = async (): Promise<AdjudicatorsResponse> => {
     console.error("Error fetching adjudicators:", error);
     throw error;
   }
+};
+
+export const getAdjudicatorById = async (id: string): Promise<Adjudicator> => {
+  const { data, error } = await supabase
+    .from("adj_profiles")
+    .select("*")
+    .eq("id", id)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return data as unknown as Adjudicator;
+};
+
+export const getAdjudicatorByUserId = async (
+  userId: string
+): Promise<string> => {
+  const { data, error } = await supabase
+    .from("adj_profiles")
+    .select("id")
+    .eq("user_id", userId)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return data.id;
 };

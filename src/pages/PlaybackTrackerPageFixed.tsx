@@ -1,81 +1,51 @@
 import { AppLayout } from "@/components/AppLayout";
 import PlaybackTrackerFixed from "@/components/PlaybackTrackerFixed";
-import { CritiqueSession, TimelineEvent } from "@/types/critiqueTypes";
-import { DrawAction } from "@/types/timelineTypes";
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
-import { testBucketSetup } from "../utils/testBucketSetup";
-
-// Make test function available in console for debugging
-if (typeof window !== 'undefined') {
-  (window as any).testBucketSetup = testBucketSetup;
-}
-
-interface DrawAction {
-  path: { x: number; y: number }[];
-  timestamp: number;
-  startTime: number;
-  endTime: number;
-  color: string;
-  width: number;
-  id?: string;
-  isVisible?: boolean;
-}
-
-interface TimelineEvent {
-  type: "pause" | "resume" | "seek" | "play";
-  timestamp: number;
-  time: number;
-  duration?: number;
-  id?: string;
-}
-
-interface CritiqueSession {
-  videoUrl: string;
-  audioUrl: string | null;
-  drawActions: DrawAction[];
-  timelineEvents: TimelineEvent[];
-  createdAt: string;
-  id: string;
-}
+import { useSearchParams } from "react-router-dom";
+import { getCritiqueById } from "../lib/critiqueService";
+import { VIDEO_UPLOADS_BUCKET } from "../lib/storage";
+import { supabase } from "../lib/supabase";
+import { DrawAction } from "../types/critiqueTypes";
 
 const PlaybackTrackerPageFixed: React.FC = () => {
-  const { videoId } = useParams<{ videoId: string }>();
-  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+  const [search] = useSearchParams();
+  const critiqueId = search.get("critiqueId");
   const [drawActions, setDrawActions] = useState<DrawAction[]>([]);
-  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
-  const [videoUrl, setVideoUrl] = useState<string>(
-    "https://tasowytszirhdvdiwuia.supabase.co/storage/v1/object/sign/dance-critiques/dance.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV81MjJmOGViYi1iNDllLTQzNTQtOTRhNi04YzQxMjk2ZWYzMGQiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJkYW5jZS1jcml0aXF1ZXMvZGFuY2UubXA0IiwiaWF0IjoxNzQ5NDEwMDEzLCJleHAiOjE3ODA5NDYwMTN9.qu4MZU1Ocfft0Pc1kiP6GW-x83hnqfknWplpR3NS79g"
-  );
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const savedDraft = localStorage.getItem(
-      `critique_draft_${videoId || "demo"}`
-    );
-    if (savedDraft) {
-      try {
-        const session: CritiqueSession = JSON.parse(savedDraft);
-        setRecordedAudioUrl(session.audioUrl);
-        setDrawActions(session.drawActions || []);
-        setTimelineEvents(session.timelineEvents || []);
-        console.log("📂 Loaded saved draft:", {
-          audioUrl: !!session.audioUrl,
-          drawActions: session.drawActions?.length || 0,
-          timelineEvents: session.timelineEvents?.length || 0,
-        });
-      } catch (error) {
-        console.error("Failed to load saved draft:", error);
+    const fetchSignedUrl = async (clientId: string, file_name: string) => {
+      if (clientId && file_name) {
+        try {
+          const { data, error } = await supabase.storage
+            .from(VIDEO_UPLOADS_BUCKET)
+            .createSignedUrl(`${clientId}/${file_name}`, 3600);
+
+          if (data) {
+            setVideoUrl(data.signedUrl);
+          }
+        } catch (error) {
+          console.log(error);
+        }
       }
+    };
+
+    const fetchCritique = async () => {
+      const critique = await getCritiqueById(critiqueId);
+      fetchSignedUrl(critique.user_id, critique.video.file_name);
+    };
+
+    if (critiqueId) {
+      fetchCritique();
     }
-  }, [videoId]);
+  }, [critiqueId]);
 
   return (
     <AppLayout noHeader={true}>
-      <div className="container mx-auto -mt-16">
+      <div className="container mx-auto">
         <PlaybackTrackerFixed
           videoUrl={videoUrl}
-          setRecordedAudioUrl={setRecordedAudioUrl}
           drawActions={drawActions}
           setDrawActions={setDrawActions}
           videoRef={videoRef}
