@@ -185,6 +185,17 @@ export const adjudicatorNavigationItems: NavigationItem[] = [
   },
 ];
 
+// Adjudicator navigation items for unapproved adjudicators
+
+// Adjudicator navigation items
+export const unApprovedAdjudicatorNavigationItems: NavigationItem[] = [
+  {
+    title: "Support",
+    href: "/adjudicator/support",
+    icon: Headphones,
+  },
+];
+
 // Studio Critique navigation items
 export const studioCritiqueNavigationItems: NavigationItem[] = [
   {
@@ -258,35 +269,32 @@ export const userNavigationItems: NavigationItem[] = [
 ];
 
 // Helper function to convert NavigationItem[] to NavSection[]
-export function getNavigationByRole(role: UserRole): NavSection[] {
-  console.log("getNavigationByRole called with role:", role);
-
+export function getNavigationByRole(
+  role: UserRole,
+  isAdjudicatorApproved: boolean
+): NavSection[] {
   let items: NavigationItem[] = [];
 
   switch (role) {
     case "admin":
       items = adminNavigationItems;
-      console.log("Using admin navigation items");
       break;
     case "adjudicator":
-      items = adjudicatorNavigationItems;
-      console.log("Using adjudicator navigation items");
+      items = isAdjudicatorApproved
+        ? adjudicatorNavigationItems
+        : unApprovedAdjudicatorNavigationItems;
       break;
     case "studio-owner":
       items = studioOwnerNavigationItems;
-      console.log("Using studio-owner navigation items");
       break;
     case "studio_critique":
       items = studioCritiqueNavigationItems;
-      console.log("Using studio_critique navigation items");
       break;
     case "client":
       items = clientNavigationItems;
-      console.log("Using client navigation items");
       break;
     default:
       items = userNavigationItems;
-      console.log("Using default navigation items");
   }
 
   // Convert NavigationItem[] to NavItem[]

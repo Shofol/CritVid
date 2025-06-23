@@ -21,6 +21,8 @@ type AppContextType = {
   setSidebarOpen: (open: boolean) => void;
   privateCritiqueMode: boolean;
   setPrivateCritiqueMode: (enabled: boolean) => void;
+  isAdjudicatorApproved: boolean;
+  setIsAdjudicatorApproved: (approved: boolean) => void;
 };
 
 const AppContext = createContext<AppContextType>({
@@ -33,6 +35,8 @@ const AppContext = createContext<AppContextType>({
   setSidebarOpen: () => {},
   privateCritiqueMode: false,
   setPrivateCritiqueMode: () => {},
+  isAdjudicatorApproved: false,
+  setIsAdjudicatorApproved: () => {},
 });
 
 export const useApp = () => useContext(AppContext);
@@ -47,6 +51,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [privateCritiqueMode, setPrivateCritiqueMode] = useState(false);
+  const [isAdjudicatorApproved, setIsAdjudicatorApproved] = useState(false);
 
   const value = {
     user,
@@ -58,6 +63,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     setSidebarOpen,
     privateCritiqueMode,
     setPrivateCritiqueMode,
+    isAdjudicatorApproved,
+    setIsAdjudicatorApproved,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

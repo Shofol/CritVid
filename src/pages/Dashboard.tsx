@@ -2,19 +2,33 @@ import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getAdjudicatorByUserId } from "../services/adjudicatorService";
 
 const Dashboard: React.FC = () => {
-  const { userRole } = useApp();
+  const { user } = useApp();
+  const { userRole, setIsAdjudicatorApproved } = useApp();
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchAdjudicatorProfile = async () => {
+      const adjudicator = await getAdjudicatorByUserId(user.id);
+      if (adjudicator && adjudicator.approved !== true) {
+        navigate("/adjudicator/apply");
+      } else {
+        setIsAdjudicatorApproved(true);
+      }
+    };
+
+    if (userRole === "adjudicator") {
+      fetchAdjudicatorProfile();
+    }
     // Redirect to the appropriate dashboard based on role
     switch (userRole) {
       case "admin":
         navigate("/admin/dashboard");
         break;
       case "adjudicator":
-        navigate("/adjudicator/apply");
+        navigate("/adjudicator/dashboard");
         break;
       case "studio_critique":
         navigate("/studio/dashboard");
@@ -26,7 +40,7 @@ const Dashboard: React.FC = () => {
         // If no specific role, show a basic layout with the role-based sidebar
         break;
     }
-  }, [userRole, navigate]);
+  }, [userRole, user, navigate]);
 
   // Show a loading state while redirecting
   return (

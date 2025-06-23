@@ -1,12 +1,13 @@
-import React from 'react';
-import { AppLayout } from '@/components/AppLayout';
-import HelpContent from '@/components/help/HelpContent';
+import HelpContent from "@/components/help/HelpContent";
+import React from "react";
+import LandingHeader from "../components/landing/LandingHeader";
 
 const Help: React.FC = () => {
   return (
-    <AppLayout>
+    <>
+      <LandingHeader />
       <HelpContent />
-    </AppLayout>
+    </>
   );
 };
 

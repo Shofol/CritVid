@@ -46,14 +46,14 @@ export const getAdjudicatorById = async (id: string): Promise<Adjudicator> => {
 
 export const getAdjudicatorByUserId = async (
   userId: string
-): Promise<string> => {
+): Promise<Adjudicator> => {
   const { data, error } = await supabase
     .from("adj_profiles")
-    .select("id")
+    .select("*")
     .eq("user_id", userId)
     .single();
   if (error) {
     throw error;
   }
-  return data.id;
+  return data as unknown as Adjudicator;
 };

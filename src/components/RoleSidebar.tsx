@@ -10,7 +10,7 @@ interface RoleSidebarProps {
 
 const RoleSidebar: React.FC<RoleSidebarProps> = ({ className }) => {
   const location = useLocation();
-  const { userRole } = useApp();
+  const { userRole, isAdjudicatorApproved } = useApp();
 
   // Debug logging to check the current role
   useEffect(() => {
@@ -24,7 +24,10 @@ const RoleSidebar: React.FC<RoleSidebarProps> = ({ className }) => {
   };
 
   // Get navigation sections based on user role
-  const navigationSections = getNavigationByRole(userRole);
+  const navigationSections = getNavigationByRole(
+    userRole,
+    isAdjudicatorApproved
+  );
 
   // Debug logging to check the navigation items
   useEffect(() => {
