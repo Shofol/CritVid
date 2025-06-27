@@ -1,7 +1,9 @@
 import {
   ASSIGN_CRITIQUE_FUNCTION,
   GET_CRITIQUE_BY_ID_FUNCTION,
+  SAVE_CRITIQUE_FEEDBACK_FUNCTION,
 } from "../config/constants";
+import { supabase } from "../lib/supabase";
 import { Critique } from "../types/critiqueTypes";
 import { getAuthToken } from "./authUtils";
 
@@ -141,4 +143,141 @@ export const getAdjudicatorCritiques = async (
 // Get all critiques for a user
 export const getUserCritiques = async (userId: string): Promise<Critique[]> => {
   return getCritiques({ userId });
+};
+
+// Save critique feedback with video
+export const saveCritiqueFeedback = async (
+  userId: string,
+  adjudicatorId: string,
+  clientVideoId: number,
+  critiqueId?: string,
+  reviewId?: string,
+  videoBlob?: Blob,
+  exercises?: string,
+  suggestions?: string,
+  transcription?: string,
+  note?: string
+): Promise<{
+  success: boolean;
+  feedbackId?: string;
+  feedbackVideoId?: number;
+  error?: string;
+}> => {
+  try {
+    const token = await getAuthToken();
+    if (!token) throw new Error("No access token available");
+
+    // Step 1: Save feedback data first to get the feedback ID
+    console.log("📝 Saving feedback data...");
+    const response = await fetch(SAVE_CRITIQUE_FEEDBACK_FUNCTION, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId,
+        adjudicatorId,
+        clientVideoId,
+        critiqueId,
+        reviewId,
+        exercises,
+        suggestions,
+        transcription,
+        note,
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to save critique feedback");
+    }
+
+    const feedbackId = result.feedbackId;
+    console.log("✅ Feedback saved with ID:", feedbackId);
+
+    let feedbackVideoId: number | undefined;
+
+    // Step 2: Upload video to storage if provided, using feedback ID as filename
+    if (videoBlob) {
+      try {
+        console.log("📹 Uploading video to storage...");
+
+        // Use feedback ID as filename
+        const fileName = `${feedbackId}.webm`;
+
+        // Upload to dance-critiques bucket
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("dance-critiques")
+          .upload(fileName, videoBlob, {
+            cacheControl: "3600",
+            upsert: false,
+            contentType: "video/webm",
+          });
+
+        if (uploadError) {
+          console.error("Error uploading video:", uploadError);
+          throw uploadError;
+        }
+
+        console.log("✅ Video uploaded successfully:", uploadData.path);
+
+        // Create a record in the critique_videos table
+        const { data: videoRecordData, error: videoError } = await supabase
+          .from("critique_videos")
+          .insert([
+            {
+              file_name: fileName,
+              file_path: uploadData.path,
+              file_size: videoBlob.size,
+              file_type: "video/webm",
+              user_id: userId,
+              adjudicator_id: adjudicatorId,
+            },
+          ])
+          .select();
+
+        if (videoError) {
+          console.error("Error creating video record:", videoError);
+          throw videoError;
+        }
+
+        feedbackVideoId = videoRecordData[0].id;
+        console.log("✅ Created video record with ID:", feedbackVideoId);
+
+        // Step 3: Update the feedback record with the video ID
+        const { error: updateError } = await supabase
+          .from("critiques_feedback")
+          .update({
+            feedback_video_id: feedbackVideoId,
+          })
+          .eq("id", feedbackId);
+
+        if (updateError) {
+          console.error("Error updating feedback with video ID:", updateError);
+          throw updateError;
+        }
+
+        console.log("✅ Updated feedback record with video ID");
+      } catch (videoError) {
+        console.error("Error in video upload process:", videoError);
+        // Continue without video if upload fails
+        console.log(
+          "⚠️ Video upload failed, but feedback was saved successfully"
+        );
+      }
+    }
+
+    return {
+      success: true,
+      feedbackId: feedbackId,
+      feedbackVideoId: feedbackVideoId,
+    };
+  } catch (error) {
+    console.error("Error saving critique feedback:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
 };

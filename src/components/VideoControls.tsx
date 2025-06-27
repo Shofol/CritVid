@@ -125,7 +125,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({ videoRef }) => {
   };
 
   return (
-    <div className="bg-transparent text-white p-4 rounded-lg space-y-3 absolute bottom-0 left-0 right-0">
+    <div className="bg-black/10 text-white p-4 rounded-lg space-y-3 absolute bottom-0 left-0 right-0">
       {/* Progress Bar */}
       <div className="space-y-2">
         <Slider

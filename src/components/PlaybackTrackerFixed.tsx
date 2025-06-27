@@ -1,9 +1,10 @@
 import { toast } from "@/components/ui/use-toast";
-import { uploadRecordedVideo } from "@/lib/storage";
+import { saveCritiqueFeedback } from "@/lib/critiqueService";
 import { Highlighter, Play } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { useApp } from "../contexts/AppContext";
 import { useUnifiedCritiqueScreenRecording } from "../hooks/useUnifiedCritiqueScreenRecording";
-import { DrawAction } from "../types/critiqueTypes";
+import { Critique, DrawAction } from "../types/critiqueTypes";
 import DrawingCanvasFixed from "./DrawingCanvasFixed";
 import UnifiedCritiqueControls from "./UnifiedCritiqueControls";
 import VideoControls from "./VideoControls";
@@ -14,6 +15,7 @@ interface PlaybackTrackerProps {
   drawActions: DrawAction[];
   setDrawActions: (actions: DrawAction[]) => void;
   videoRef: React.RefObject<HTMLVideoElement>;
+  critique?: Critique | null;
 }
 
 const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
@@ -21,6 +23,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
   drawActions,
   setDrawActions,
   videoRef,
+  critique,
 }) => {
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
@@ -42,15 +45,14 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
   } = useUnifiedCritiqueScreenRecording(videoRef, videoUrl);
 
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const { setSidebarOpen } = useApp();
 
   // useEffect(() => {
   //   setRecordedAudioUrl(recordedVideoUrl);
   // }, [recordedVideoUrl, setRecordedAudioUrl]);
 
   const effectiveVideoUrl =
-    isPlaybackMode && recordedVideoUrl
-      ? recordedVideoUrl
-      : videoUrl || "https://www.w3schools.com/html/mov_bbb.mp4";
+    isPlaybackMode && recordedVideoUrl ? recordedVideoUrl : videoUrl;
 
   const handlePlayRecording = () => {
     if (recordedVideoUrl) {
@@ -84,10 +86,10 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
 
     const handleError = () => {
       setVideoError(true);
-      if (video.src !== "https://www.w3schools.com/html/mov_bbb.mp4") {
-        video.src = "https://www.w3schools.com/html/mov_bbb.mp4";
-        video.load();
-      }
+      // if (video.src !== "https://www.w3schools.com/html/mov_bbb.mp4") {
+      //   video.src = "https://www.w3schools.com/html/mov_bbb.mp4";
+      video.load();
+      // }
     };
 
     const handlePlay = () => {
@@ -150,6 +152,7 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
   };
 
   const handleStopRecording = async () => {
+    setSidebarOpen(true);
     try {
       await stopCritique();
       setIsDrawingMode(false);
@@ -174,23 +177,57 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
       return;
     }
 
-    try {
-      console.log("☁️ Starting video upload to Supabase storage...");
-
-      const filePath = await uploadRecordedVideo(recordedVideoBlob);
-
-      console.log("✅ Video uploaded successfully to:", filePath);
-      toast({
-        title: "Upload Successful",
-        description: `Video uploaded to cloud storage at ${filePath}`,
-        variant: "default",
-      });
-    } catch (error) {
-      console.error("❌ Failed to upload video:", error);
+    if (!critique) {
+      console.warn("⚠️ No critique data available");
       toast({
         title: "Upload Failed",
-        description:
-          "Failed to upload video to cloud storage. Please try again.",
+        description: "No critique data available.",
+        variant: "destructive" as const,
+      });
+      return;
+    }
+
+    if (!critique.user_id || !critique.adjudicator_id || !critique.video_id) {
+      console.warn("⚠️ Missing required critique data");
+      toast({
+        title: "Upload Failed",
+        description: "Missing required critique data.",
+        variant: "destructive" as const,
+      });
+      return;
+    }
+
+    try {
+      console.log("☁️ Starting critique feedback upload...");
+
+      const result = await saveCritiqueFeedback(
+        critique.user_id,
+        critique.adjudicator_id,
+        critique.video_id,
+        critique.id,
+        critique.review_id,
+        recordedVideoBlob,
+        undefined, // exercises
+        undefined, // suggestions
+        undefined, // transcription
+        undefined // note
+      );
+
+      if (result.success) {
+        console.log("✅ Critique feedback saved successfully:", result);
+        toast({
+          title: "Upload Successful",
+          description: `Critique feedback saved with ID: ${result.feedbackId}`,
+          variant: "default",
+        });
+      } else {
+        throw new Error(result.error || "Failed to save critique feedback");
+      }
+    } catch (error) {
+      console.error("❌ Failed to save critique feedback:", error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to save critique feedback. Please try again.",
         variant: "destructive" as const,
       });
     }
@@ -271,10 +308,10 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
             <video
               ref={videoRef}
               src={effectiveVideoUrl}
-              className="w-full h-full object-contain rounded-lg"
+              className="w-full max-h-[80vh] object-contain rounded-lg"
               preload="metadata"
               playsInline
-              controls={!!isPlaybackMode} // Show native controls in playback mode
+              controls={Boolean(isPlaybackMode)} // Show native controls in playback mode
             />
 
             {!isPlaybackMode && (

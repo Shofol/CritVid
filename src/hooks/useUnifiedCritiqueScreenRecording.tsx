@@ -1,6 +1,7 @@
 import { safeArrayAccess } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useApp } from "../contexts/AppContext";
 import { useScreenRecorder } from "./useScreenRecorder";
 import { useTimelineActions } from "./useTimelineActions";
 import { useVideoActions } from "./useVideoActions";
@@ -48,6 +49,7 @@ export const useUnifiedCritiqueScreenRecording = (
   const [isDrawingEnabled, setIsDrawingEnabled] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const cleanupRef = useRef<(() => void)[]>([]);
+  const { setSidebarOpen } = useApp();
 
   const {
     isRecording,
@@ -158,6 +160,7 @@ export const useUnifiedCritiqueScreenRecording = (
   );
 
   const startCritique = useCallback(async () => {
+    setSidebarOpen(false);
     if (isRecording || isInitializing) {
       console.warn("⚠️ Already recording or initializing");
       return;
@@ -193,6 +196,7 @@ export const useUnifiedCritiqueScreenRecording = (
     clearVideoActions,
     clearTimelineEvents,
     clearRecording,
+    setSidebarOpen,
   ]);
 
   // Enhanced stopCritique with complete media cleanup

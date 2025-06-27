@@ -57,7 +57,7 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
     }
   };
 
-  const handleUploadClick = async () => {
+  const handleReviewCritiqueClick = async () => {
     console.log("☁️ Upload Recording button clicked");
     if (onUploadRecording) {
       setIsUploading(true);
@@ -130,14 +130,14 @@ const UnifiedCritiqueControls: React.FC<UnifiedCritiqueControlsProps> = ({
                   </Button>
 
                   <Button
-                    onClick={handleUploadClick}
+                    onClick={handleReviewCritiqueClick}
                     disabled={isUploading}
                     variant="outline"
                     className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 disabled:opacity-50"
                     size="sm"
                   >
                     <Upload className="w-4 h-4" />
-                    {isUploading ? "Uploading..." : "Upload to Cloud"}
+                    {isUploading ? "Uploading..." : "Review Critique"}
                   </Button>
                 </>
               )}

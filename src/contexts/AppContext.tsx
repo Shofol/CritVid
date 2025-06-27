@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { UserRole } from "@/types/navigation";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { getAdjudicatorByUserId } from "../services/adjudicatorService";
 
 type User = {
   id: string;
@@ -52,6 +53,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [privateCritiqueMode, setPrivateCritiqueMode] = useState(false);
   const [isAdjudicatorApproved, setIsAdjudicatorApproved] = useState(false);
+
+  useEffect(() => {
+    const fetchAdjudicatorProfile = async () => {
+      const adjudicator = await getAdjudicatorByUserId(user.id);
+      if (adjudicator && adjudicator.approved !== true) {
+        setIsAdjudicatorApproved(false);
+      } else {
+        setIsAdjudicatorApproved(true);
+      }
+    };
+
+    if (userRole === "adjudicator") {
+      fetchAdjudicatorProfile();
+    }
+  }, [user, userRole]);
 
   const value = {
     user,

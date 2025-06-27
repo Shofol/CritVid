@@ -42,8 +42,25 @@ Deno.serve(async (req) => {
     // Upload headshot to storage if provided
     let headshotUrl = profile.headshot;
     if (headshotFile) {
+      // Handle different file formats
+      let base64Data = headshotFile;
+
+      // Check if it's a data URL format (starts with data:)
+      if (headshotFile.startsWith("data:")) {
+        // Extract base64 part after the comma
+        const parts = headshotFile.split(",");
+        if (parts.length !== 2) {
+          throw new Error("Invalid data URL format for headshot");
+        }
+        base64Data = parts[1];
+      }
+
+      // Validate that we have base64 data
+      if (!base64Data || typeof base64Data !== "string") {
+        throw new Error("Invalid headshot file data");
+      }
+
       // Convert base64 to blob
-      const base64Data = headshotFile.split(",")[1];
       const binaryData = atob(base64Data);
       const bytes = new Uint8Array(binaryData.length);
       for (let i = 0; i < binaryData.length; i++) {

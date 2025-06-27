@@ -5,13 +5,14 @@ import { useSearchParams } from "react-router-dom";
 import { getCritiqueById } from "../lib/critiqueService";
 import { VIDEO_UPLOADS_BUCKET } from "../lib/storage";
 import { supabase } from "../lib/supabase";
-import { DrawAction } from "../types/critiqueTypes";
+import { Critique, DrawAction } from "../types/critiqueTypes";
 
 const PlaybackTrackerPageFixed: React.FC = () => {
   const [search] = useSearchParams();
   const critiqueId = search.get("critiqueId");
   const [drawActions, setDrawActions] = useState<DrawAction[]>([]);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [critique, setCritique] = useState<Critique | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -32,8 +33,9 @@ const PlaybackTrackerPageFixed: React.FC = () => {
     };
 
     const fetchCritique = async () => {
-      const critique = await getCritiqueById(critiqueId);
-      fetchSignedUrl(critique.user_id, critique.video.file_name);
+      const critiqueData = await getCritiqueById(critiqueId);
+      setCritique(critiqueData);
+      fetchSignedUrl(critiqueData.user_id, critiqueData.video.file_name);
     };
 
     if (critiqueId) {
@@ -49,6 +51,7 @@ const PlaybackTrackerPageFixed: React.FC = () => {
           drawActions={drawActions}
           setDrawActions={setDrawActions}
           videoRef={videoRef}
+          critique={critique}
         />
       </div>
     </AppLayout>

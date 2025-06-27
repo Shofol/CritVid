@@ -13,6 +13,7 @@ const Dashboard: React.FC = () => {
     const fetchAdjudicatorProfile = async () => {
       const adjudicator = await getAdjudicatorByUserId(user.id);
       if (adjudicator && adjudicator.approved !== true) {
+        setIsAdjudicatorApproved(false);
         navigate("/adjudicator/apply");
       } else {
         setIsAdjudicatorApproved(true);

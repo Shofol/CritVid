@@ -13,14 +13,14 @@ const PendingCritiques: React.FC = () => {
 
   useEffect(() => {
     const fetchPendingCritiques = async () => {
-      const adjudicatorId = await getAdjudicatorByUserId(user.id);
+      const adjudicator = await getAdjudicatorByUserId(user.id);
 
-      if (adjudicatorId) {
+      if (adjudicator) {
         try {
           setLoading(true);
           // Get the adjudicator ID from the user's profile or context
           // For now, we'll use the user ID as adjudicator ID
-          const data = await getAdjudicatorCritiques(adjudicatorId, "pending");
+          const data = await getAdjudicatorCritiques(adjudicator.id, "pending");
           setPendingCritiques(data);
         } catch (error) {
           console.error("Error fetching pending critiques:", error);
