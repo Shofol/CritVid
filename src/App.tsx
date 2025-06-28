@@ -4,9 +4,7 @@ import { Route, Routes } from "react-router-dom";
 // Convert all page imports to dynamic imports using React.lazy()
 const AuthCallback = React.lazy(() => import("@/pages/AuthCallback"));
 const Checkout = React.lazy(() => import("@/pages/Checkout"));
-const ConnectionTestPage = React.lazy(() => import("@/pages/ConnectionTest"));
 const Contact = React.lazy(() => import("@/pages/Contact"));
-const CritiquePreview = React.lazy(() => import("@/pages/CritiquePreview"));
 const Dashboard = React.lazy(() => import("@/pages/Dashboard"));
 // const DashboardSelector = React.lazy(() => import("@/pages/DashboardSelector"));
 const EmailVerification = React.lazy(() => import("@/pages/EmailVerification"));
@@ -18,7 +16,7 @@ const Index = React.lazy(() => import("@/pages/Index"));
 const Login = React.lazy(() => import("@/pages/Login"));
 const NotFound = React.lazy(() => import("@/pages/NotFound"));
 const PlaybackTrackerPageFixed = React.lazy(
-  () => import("@/pages/PlaybackTrackerPageFixed")
+  () => import("@/pages/CritiqueRecording")
 );
 const Privacy = React.lazy(() => import("@/pages/Privacy"));
 const PrivateCritique = React.lazy(() => import("@/pages/PrivateCritique"));
@@ -91,6 +89,9 @@ const ProfileEditor = React.lazy(
 );
 const AdjudicatorSupport = React.lazy(
   () => import("@/pages/adjudicator/Support")
+);
+const ReviewCritique = React.lazy(
+  () => import("@/pages/adjudicator/ReviewCritique")
 );
 
 // Studio pages
@@ -282,18 +283,6 @@ function App() {
         }
       />
 
-      {/* Connection Test Route - public for testing */}
-      <Route
-        path="/connection-test"
-        element={
-          <PublicRoute>
-            <Suspense fallback={<PageLoader />}>
-              <ConnectionTestPage />
-            </Suspense>
-          </PublicRoute>
-        }
-      />
-
       {/* Demo routes - public */}
 
       <Route
@@ -353,16 +342,6 @@ function App() {
 
       {/* VIDEO ROUTES */}
       <Route
-        path="/video/:id"
-        element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <CritiquePreview />
-            </Suspense>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/video-player/:id"
         element={
           <ProtectedRoute>
@@ -372,16 +351,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/critique/:id"
-        element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <CritiquePreview />
-            </Suspense>
-          </ProtectedRoute>
-        }
-      />
+
       <Route
         path="/critique-editor/:videoId"
         element={
@@ -448,16 +418,6 @@ function App() {
           <ProtectedRoute>
             <Suspense fallback={<PageLoader />}>
               <PlaybackTrackerPageFixed />
-            </Suspense>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/critique-preview/:videoId"
-        element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <CritiquePreview />
             </Suspense>
           </ProtectedRoute>
         }
@@ -765,6 +725,16 @@ function App() {
           <ProtectedRoute adjudicatorOnly>
             <Suspense fallback={<PageLoader />}>
               <PlaybackTrackerPageFixed />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/review-critique/:critiqueId"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ReviewCritique />
             </Suspense>
           </ProtectedRoute>
         }

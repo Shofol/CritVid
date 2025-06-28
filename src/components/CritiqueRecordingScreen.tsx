@@ -18,7 +18,7 @@ interface PlaybackTrackerProps {
   critique?: Critique | null;
 }
 
-const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
+const CritiqueRecordingScreen: React.FC<PlaybackTrackerProps> = ({
   videoUrl,
   drawActions,
   setDrawActions,
@@ -359,4 +359,4 @@ const PlaybackTrackerFixed: React.FC<PlaybackTrackerProps> = ({
   );
 };
 
-export default PlaybackTrackerFixed;
+export default CritiqueRecordingScreen;

@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/AppLayout";
-import PlaybackTrackerFixed from "@/components/PlaybackTrackerFixed";
+import CritiqueRecordingScreen from "@/components/CritiqueRecordingScreen";
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getCritiqueById } from "../lib/critiqueService";
@@ -7,7 +7,7 @@ import { VIDEO_UPLOADS_BUCKET } from "../lib/storage";
 import { supabase } from "../lib/supabase";
 import { Critique, DrawAction } from "../types/critiqueTypes";
 
-const PlaybackTrackerPageFixed: React.FC = () => {
+const CritiqueRecording: React.FC = () => {
   const [search] = useSearchParams();
   const critiqueId = search.get("critiqueId");
   const [drawActions, setDrawActions] = useState<DrawAction[]>([]);
@@ -46,7 +46,7 @@ const PlaybackTrackerPageFixed: React.FC = () => {
   return (
     <AppLayout noHeader={true}>
       <div className="container mx-auto">
-        <PlaybackTrackerFixed
+        <CritiqueRecordingScreen
           videoUrl={videoUrl}
           drawActions={drawActions}
           setDrawActions={setDrawActions}
@@ -58,4 +58,4 @@ const PlaybackTrackerPageFixed: React.FC = () => {
   );
 };
 
-export default PlaybackTrackerPageFixed;
+export default CritiqueRecording;

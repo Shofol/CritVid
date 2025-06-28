@@ -168,11 +168,11 @@ export const adjudicatorNavigationItems: NavigationItem[] = [
     href: "/adjudicator/payments",
     icon: CreditCard,
   },
-  {
-    title: "Video Editor",
-    href: "/video-editor",
-    icon: Edit3,
-  },
+  // {
+  //   title: "Video Editor",
+  //   href: "/video-editor",
+  //   icon: Edit3,
+  // },
   {
     title: "My Profile",
     href: "/profile",
