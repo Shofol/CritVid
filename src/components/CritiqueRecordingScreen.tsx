@@ -2,6 +2,7 @@ import { toast } from "@/components/ui/use-toast";
 import { saveCritiqueFeedback } from "@/lib/critiqueService";
 import { Highlighter, Play } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useApp } from "../contexts/AppContext";
 import { useUnifiedCritiqueScreenRecording } from "../hooks/useUnifiedCritiqueScreenRecording";
 import { Critique, DrawAction } from "../types/critiqueTypes";
@@ -10,7 +11,7 @@ import UnifiedCritiqueControls from "./UnifiedCritiqueControls";
 import VideoControls from "./VideoControls";
 import { Button } from "./ui/button";
 
-interface PlaybackTrackerProps {
+interface CritiqueRecordingScreenProps {
   videoUrl: string;
   drawActions: DrawAction[];
   setDrawActions: (actions: DrawAction[]) => void;
@@ -18,7 +19,7 @@ interface PlaybackTrackerProps {
   critique?: Critique | null;
 }
 
-const CritiqueRecordingScreen: React.FC<PlaybackTrackerProps> = ({
+const CritiqueRecordingScreen: React.FC<CritiqueRecordingScreenProps> = ({
   videoUrl,
   drawActions,
   setDrawActions,
@@ -46,10 +47,7 @@ const CritiqueRecordingScreen: React.FC<PlaybackTrackerProps> = ({
 
   const [videoPlaying, setVideoPlaying] = useState(false);
   const { setSidebarOpen } = useApp();
-
-  // useEffect(() => {
-  //   setRecordedAudioUrl(recordedVideoUrl);
-  // }, [recordedVideoUrl, setRecordedAudioUrl]);
+  const navigate = useNavigate();
 
   const effectiveVideoUrl =
     isPlaybackMode && recordedVideoUrl ? recordedVideoUrl : videoUrl;
@@ -86,10 +84,7 @@ const CritiqueRecordingScreen: React.FC<PlaybackTrackerProps> = ({
 
     const handleError = () => {
       setVideoError(true);
-      // if (video.src !== "https://www.w3schools.com/html/mov_bbb.mp4") {
-      //   video.src = "https://www.w3schools.com/html/mov_bbb.mp4";
       video.load();
-      // }
     };
 
     const handlePlay = () => {
@@ -217,9 +212,10 @@ const CritiqueRecordingScreen: React.FC<PlaybackTrackerProps> = ({
         console.log("✅ Critique feedback saved successfully:", result);
         toast({
           title: "Upload Successful",
-          description: `Critique feedback saved with ID: ${result.feedbackId}`,
+          description: `Critique feedback saved`,
           variant: "default",
         });
+        navigate(`/adjudicator/review-critique/${result.feedbackId}`);
       } else {
         throw new Error(result.error || "Failed to save critique feedback");
       }

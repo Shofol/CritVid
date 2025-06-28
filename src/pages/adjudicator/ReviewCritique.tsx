@@ -1,11 +1,7 @@
 import { AppLayout } from "@/components/AppLayout";
 import PlaybackPreviewPlayer from "@/components/PlaybackPreviewPlayer";
-import CritiquePaymentActions from "@/components/client/CritiquePaymentActions";
-import PaymentStatusBar from "@/components/client/PaymentStatusBar";
-import CritiqueFeedbackPanel from "@/components/critique/CritiqueFeedbackPanel";
 import PostCritiqueAI from "@/components/critique/PostCritiqueAI";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockCritiques, mockVideoSubmissions } from "@/data/mockData";
@@ -13,6 +9,7 @@ import { CritiquePaymentStatus, paymentService } from "@/lib/paymentService";
 import { ArrowLeft, Play } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import CritiqueFeedbackOptions from "../../components/adjudicator/CritiqueFeedbackOptions";
 
 interface CritiqueData {
   id: string;
@@ -136,19 +133,6 @@ const ReviewCritique: React.FC = () => {
   return (
     <AppLayout>
       <div className="container mx-auto py-6">
-        {/* Payment Status Bar */}
-        {paymentStatus && (
-          <div className="mb-6">
-            <PaymentStatusBar paymentStatus={paymentStatus} />
-            <CritiquePaymentActions
-              critiqueId={critique.id}
-              userId="current-user-id"
-              paymentStatus={paymentStatus}
-              onStatusUpdate={handlePaymentStatusUpdate}
-            />
-          </div>
-        )}
-
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <Button variant="ghost" onClick={() => navigate(-1)}>
@@ -157,12 +141,8 @@ const ReviewCritique: React.FC = () => {
             </Button>
             <div>
               <h1 className="text-3xl font-bold">{critique.videoTitle}</h1>
-              <p className="text-muted-foreground">
-                Critique by {critique.adjudicatorName} • {critique.createdAt}
-              </p>
             </div>
           </div>
-          <Badge variant="default">Completed</Badge>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -188,7 +168,7 @@ const ReviewCritique: React.FC = () => {
             />
           </div>
           <div className="space-y-6">
-            <CritiqueFeedbackPanel
+            <CritiqueFeedbackOptions
               critiqueId={critique.id}
               audioUrl={critique.audioUrl}
             />
