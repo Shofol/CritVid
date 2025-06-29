@@ -1,53 +1,32 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Button } from './ui/button';
-import { Play, Pause, RotateCcw } from 'lucide-react';
-import { mockVideoSubmissions } from '@/data/mockData';
+import { Pause, Play, RotateCcw } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { Button } from "./ui/button";
 
 interface PlaybackPreviewPlayerProps {
-  videoId?: string;
-  critiqueId?: string;
-  videoUrl?: string;
-  audioUrl?: string;
-  timelineEvents?: any[];
-  drawActions?: any[];
+  // videoId?: string;
+  // critiqueId?: string;
+  // videoUrl?: string;
+  // audioUrl?: string;
+  // timelineEvents?: any[];
+  // drawActions?: any[];
+  videoSrc: string;
 }
 
 const PlaybackPreviewPlayer: React.FC<PlaybackPreviewPlayerProps> = ({
-  videoId,
-  critiqueId,
-  videoUrl,
-  audioUrl,
-  timelineEvents = [],
-  drawActions = []
+  videoSrc,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [videoSrc, setVideoSrc] = useState<string>('');
-  const [error, setError] = useState<string>('');
-
-  useEffect(() => {
-    // Find video URL from mock data if videoId provided
-    if (videoId && Array.isArray(mockVideoSubmissions)) {
-      const video = mockVideoSubmissions.find(v => v && v.id === videoId);
-      if (video?.videoUrl) {
-        setVideoSrc(video.videoUrl);
-      }
-    } else if (videoUrl) {
-      setVideoSrc(videoUrl);
-    } else {
-      // Use a test video URL that should work
-      setVideoSrc('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
-    }
-  }, [videoId, videoUrl]);
+  const [error, setError] = useState<string>("");
 
   const handlePlayPause = async () => {
     const video = videoRef.current;
     if (!video) return;
-    
+
     try {
-      setError('');
+      setError("");
       if (isPlaying) {
         video.pause();
         setIsPlaying(false);
@@ -57,12 +36,12 @@ const PlaybackPreviewPlayer: React.FC<PlaybackPreviewPlayerProps> = ({
           await video.play();
           setIsPlaying(true);
         } else {
-          setError('Video not ready for playback');
+          setError("Video not ready for playback");
         }
       }
     } catch (error: any) {
-      console.error('Playback error:', error);
-      setError(error.message || 'Playback failed');
+      console.error("Playback error:", error);
+      setError(error.message || "Playback failed");
       setIsPlaying(false);
     }
   };
@@ -94,19 +73,22 @@ const PlaybackPreviewPlayer: React.FC<PlaybackPreviewPlayerProps> = ({
   };
 
   const handleError = (e: any) => {
-    console.error('Video error:', e);
-    setError('Failed to load video');
+    console.error("Video error:", e);
+    setError("Failed to load video");
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
     <div className="space-y-4">
-      <div className="relative bg-black rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
+      <div
+        className="relative bg-black rounded-lg overflow-hidden"
+        style={{ aspectRatio: "16/9" }}
+      >
         {error ? (
           <div className="w-full h-full flex items-center justify-center text-white bg-gray-800">
             <div className="text-center">
@@ -129,13 +111,13 @@ const PlaybackPreviewPlayer: React.FC<PlaybackPreviewPlayerProps> = ({
             crossOrigin="anonymous"
           />
         )}
-        
+
         {/* Overlay for critique info */}
-        {critiqueId && (
+        {/* {critiqueId && (
           <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded text-sm">
             Critique View
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Controls */}
@@ -144,7 +126,7 @@ const PlaybackPreviewPlayer: React.FC<PlaybackPreviewPlayerProps> = ({
           <RotateCcw className="w-4 h-4 mr-2" />
           Restart
         </Button>
-        
+
         <Button onClick={handlePlayPause} size="lg" disabled={!!error}>
           {isPlaying ? (
             <Pause className="w-6 h-6" />
@@ -159,12 +141,14 @@ const PlaybackPreviewPlayer: React.FC<PlaybackPreviewPlayerProps> = ({
         <div className="text-sm text-gray-600">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
-        
+
         {/* Progress bar */}
         <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
+          <div
             className="bg-blue-600 h-2 rounded-full transition-all duration-100"
-            style={{ width: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%' }}
+            style={{
+              width: duration > 0 ? `${(currentTime / duration) * 100}%` : "0%",
+            }}
           />
         </div>
       </div>

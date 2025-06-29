@@ -7,22 +7,28 @@ interface ScreenRecorderOptions {
   onStart?: () => void;
   onStop?: (blob: Blob) => void;
   onError?: (error: Error) => void;
+  onAudioStop?: (audioBlob: Blob) => void;
 }
 
 export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
   const [recordedVideoBlob, setRecordedVideoBlob] = useState<Blob | null>(null);
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+  const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<
     "unknown" | "granted" | "denied"
   >("unknown");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioRecorderRef = useRef<MediaRecorder | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
   const micStreamRef = useRef<MediaStream | null>(null);
   const combinedStreamRef = useRef<MediaStream | null>(null);
+  const audioOnlyStreamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const requestPermissions = useCallback(async () => {
     try {
@@ -42,7 +48,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           autoGainControl: true,
         },
         preferCurrentTab: true,
-        selfBrowserSurface: 'include',
+        selfBrowserSurface: "include",
         systemAudio: "include",
       });
 
@@ -59,7 +65,6 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           sampleSize: { ideal: 16, min: 16 }, // 16-bit audio depth
           channelCount: { ideal: 1, exact: 1 }, // Mono for voice (clearer than stereo for speech)
         },
-
       });
 
       // Stop test streams
@@ -101,6 +106,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
       console.log("🎥 Starting screen recording...");
       setErrorMessage(null);
       chunksRef.current = [];
+      audioChunksRef.current = [];
 
       // Get screen stream with audio
       console.log("📺 Requesting screen capture with audio...");
@@ -116,7 +122,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           autoGainControl: true,
         },
         preferCurrentTab: true,
-        selfBrowserSurface: 'include',
+        selfBrowserSurface: "include",
         systemAudio: "include",
       });
 
@@ -152,6 +158,9 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
       // Create a combined stream with video from screen and mixed audio
       const combinedStream = new MediaStream();
 
+      // Create an audio-only stream for separate microphone recording
+      const audioOnlyStream = new MediaStream();
+
       // Add video track from screen
       const videoTrack = screenStream.getVideoTracks()[0];
       if (videoTrack) {
@@ -169,6 +178,14 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
         `🔊 Found ${screenAudioTracks.length} screen audio track(s) and ${micAudioTracks.length} mic audio track(s)`
       );
 
+      // Add microphone audio to the audio-only stream (just mic, no mixing)
+      if (micAudioTracks.length > 0) {
+        micAudioTracks.forEach((track) => {
+          audioOnlyStream.addTrack(track);
+          console.log("✅ Microphone audio track added to audio-only stream");
+        });
+      }
+
       if (screenAudioTracks.length === 0 && micAudioTracks.length === 0) {
         // No audio at all - warn but continue with video only
         console.warn("⚠️ No audio tracks available - recording video only");
@@ -176,8 +193,10 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           "⚠️ No audio detected. Make sure to check 'Share audio' when prompted and enable microphone access."
         );
       } else if (screenAudioTracks.length > 0 && micAudioTracks.length > 0) {
-        // Both audio sources available - mix them
-        console.log("🎵 Mixing screen and microphone audio...");
+        // Both audio sources available - mix them for combined stream
+        console.log(
+          "🎵 Mixing screen and microphone audio for combined stream..."
+        );
         try {
           const audioContext = new AudioContext();
           const screenSource = audioContext.createMediaStreamSource(
@@ -200,17 +219,17 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           screenGain.connect(destination);
           micGain.connect(destination);
 
-          // Add mixed audio track to combined stream
+          // Add mixed audio track to combined stream only
           destination.stream.getAudioTracks().forEach((track) => {
             combinedStream.addTrack(track);
             console.log("✅ Mixed audio track added to combined stream");
           });
         } catch (audioError) {
           console.error(
-            "❌ Audio mixing failed, falling back to microphone only:",
+            "❌ Audio mixing failed, falling back to microphone only for combined stream:",
             audioError
           );
-          // Fallback to microphone only
+          // Fallback to microphone only for combined stream
           micAudioTracks.forEach((track) => {
             combinedStream.addTrack(track);
             console.log(
@@ -219,15 +238,15 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
           });
         }
       } else if (screenAudioTracks.length > 0) {
-        // Only screen audio available
-        console.log("🔊 Using screen audio only");
+        // Only screen audio available - add to combined stream
+        console.log("🔊 Using screen audio only for combined stream");
         screenAudioTracks.forEach((track) => {
           combinedStream.addTrack(track);
           console.log("✅ Screen audio track added to combined stream");
         });
       } else if (micAudioTracks.length > 0) {
-        // Only microphone audio available
-        console.log("🎤 Using microphone audio only");
+        // Only microphone audio available - add to combined stream
+        console.log("🎤 Using microphone audio only for combined stream");
         micAudioTracks.forEach((track) => {
           combinedStream.addTrack(track);
           console.log("✅ Microphone audio track added to combined stream");
@@ -235,6 +254,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
       }
 
       combinedStreamRef.current = combinedStream;
+      audioOnlyStreamRef.current = audioOnlyStream;
 
       // Log final stream composition
       console.log("🎬 Final combined stream composition:", {
@@ -242,7 +262,11 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
         audioTracks: combinedStream.getAudioTracks().length,
       });
 
-      // Determine MIME type
+      console.log("🎵 Audio-only stream composition:", {
+        audioTracks: audioOnlyStream.getAudioTracks().length,
+      });
+
+      // Determine MIME type for video
       let mimeType = "video/webm;codecs=vp9,opus";
       if (!MediaRecorder.isTypeSupported(mimeType)) {
         mimeType = "video/webm;codecs=vp8,opus";
@@ -254,8 +278,19 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
         }
       }
 
-      console.log("📼 Using MIME type:", mimeType);
+      // Determine MIME type for audio
+      let audioMimeType = "audio/webm;codecs=opus";
+      if (!MediaRecorder.isTypeSupported(audioMimeType)) {
+        audioMimeType = "audio/webm";
+        if (!MediaRecorder.isTypeSupported(audioMimeType)) {
+          audioMimeType = "audio/mp4";
+        }
+      }
 
+      console.log("📼 Using video MIME type:", mimeType);
+      console.log("🎵 Using audio MIME type:", audioMimeType);
+
+      // Create MediaRecorder for combined video/audio
       const mediaRecorder = new MediaRecorder(combinedStream, {
         mimeType,
         videoBitsPerSecond: options.videoBitsPerSecond || 2500000, // 2.5 Mbps
@@ -263,7 +298,14 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
       });
       mediaRecorderRef.current = mediaRecorder;
 
-      // Set up event listeners
+      // Create MediaRecorder for audio-only
+      const audioRecorder = new MediaRecorder(audioOnlyStream, {
+        mimeType: audioMimeType,
+        audioBitsPerSecond: options.audioBitsPerSecond || 192000, // Enhanced 192 kbps for clearer audio
+      });
+      audioRecorderRef.current = audioRecorder;
+
+      // Set up event listeners for video recorder
       mediaRecorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
           chunksRef.current.push(event.data);
@@ -280,7 +322,7 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
 
       mediaRecorder.onstop = () => {
         console.log(
-          "🛑 Recording stopped, processing",
+          "🛑 Video recording stopped, processing",
           chunksRef.current.length,
           "chunks"
         );
@@ -309,16 +351,60 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
         if (options.onError) options.onError(error);
       };
 
+      // Set up event listeners for audio recorder
+      audioRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+          console.log(
+            "🎵 Audio chunk received:",
+            event.data.size,
+            "bytes, total:",
+            audioChunksRef.current.length
+          );
+        } else {
+          console.warn("⚠️ Empty audio chunk");
+        }
+      };
+
+      audioRecorder.onstop = () => {
+        console.log(
+          "🛑 Audio recording stopped, processing",
+          audioChunksRef.current.length,
+          "chunks"
+        );
+
+        if (audioChunksRef.current.length > 0) {
+          const audioBlob = new Blob(audioChunksRef.current, {
+            type: audioMimeType,
+          });
+          const audioUrl = URL.createObjectURL(audioBlob);
+
+          setRecordedAudioUrl(audioUrl);
+          setRecordedAudioBlob(audioBlob);
+          console.log("✅ Audio recording completed:", audioBlob.size, "bytes");
+
+          if (options.onAudioStop) options.onAudioStop(audioBlob);
+        }
+      };
+
+      audioRecorder.onerror = (event) => {
+        console.error("❌ Audio MediaRecorder error:", event);
+        const error = new Error("Audio recording failed");
+        setErrorMessage(error.message);
+        if (options.onError) options.onError(error);
+      };
+
       // Handle screen share ending
       videoTrack.addEventListener("ended", () => {
         console.log("🛑 Screen share ended by user");
         stopRecording();
       });
 
-      // Start recording
+      // Start both recorders
       mediaRecorder.start(100); // Collect data every 100ms
+      audioRecorder.start(100); // Collect data every 100ms
       setIsRecording(true);
-      console.log("✅ Screen recording started with MIME type:", mimeType);
+      console.log("✅ Screen and audio recording started");
 
       if (options.onStart) options.onStart();
     } catch (error: unknown) {
@@ -341,16 +427,28 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
   }, [isRecording, options]);
 
   const stopRecording = useCallback(async () => {
-    if (!isRecording || !mediaRecorderRef.current) {
+    if (!isRecording) {
       console.warn("⚠️ No active recording to stop");
       return;
     }
 
     try {
-      console.log("🛑 Stopping screen recording...");
+      console.log("🛑 Stopping screen and audio recording...");
 
-      if (mediaRecorderRef.current.state === "recording") {
+      // Stop video recorder
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state === "recording"
+      ) {
         mediaRecorderRef.current.stop();
+      }
+
+      // Stop audio recorder
+      if (
+        audioRecorderRef.current &&
+        audioRecorderRef.current.state === "recording"
+      ) {
+        audioRecorderRef.current.stop();
       }
 
       setIsRecording(false);
@@ -370,6 +468,11 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
         combinedStreamRef.current.getTracks().forEach((track) => track.stop());
         combinedStreamRef.current = null;
       }
+
+      if (audioOnlyStreamRef.current) {
+        audioOnlyStreamRef.current.getTracks().forEach((track) => track.stop());
+        audioOnlyStreamRef.current = null;
+      }
     } catch (error) {
       console.error("❌ Error stopping recording:", error);
       setIsRecording(false);
@@ -382,14 +485,22 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
       return;
     }
 
-    console.log("🧹 Clearing screen recording...");
+    console.log("🧹 Clearing screen and audio recordings...");
     setRecordedVideoUrl(null);
     setRecordedVideoBlob(null);
+    setRecordedAudioUrl(null);
+    setRecordedAudioBlob(null);
     setErrorMessage(null);
     chunksRef.current = [];
+    audioChunksRef.current = [];
 
     // Clean up streams
-    [screenStreamRef, micStreamRef, combinedStreamRef].forEach((streamRef) => {
+    [
+      screenStreamRef,
+      micStreamRef,
+      combinedStreamRef,
+      audioOnlyStreamRef,
+    ].forEach((streamRef) => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
@@ -401,6 +512,8 @@ export function useScreenRecorder(options: ScreenRecorderOptions = {}) {
     isRecording,
     recordedVideoUrl,
     recordedVideoBlob,
+    recordedAudioUrl,
+    recordedAudioBlob,
     permissionStatus,
     errorMessage,
     requestPermissions,

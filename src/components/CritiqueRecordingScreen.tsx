@@ -36,6 +36,8 @@ const CritiqueRecordingScreen: React.FC<CritiqueRecordingScreenProps> = ({
     isRecording,
     recordedVideoUrl,
     recordedVideoBlob,
+    recordedAudioUrl,
+    recordedAudioBlob,
     hasRecordedData,
     permissionStatus,
     errorMessage,
@@ -202,6 +204,7 @@ const CritiqueRecordingScreen: React.FC<CritiqueRecordingScreenProps> = ({
         critique.id,
         critique.review_id,
         recordedVideoBlob,
+        recordedAudioBlob,
         undefined, // exercises
         undefined, // suggestions
         undefined, // transcription

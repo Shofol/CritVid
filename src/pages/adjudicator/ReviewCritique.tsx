@@ -1,5 +1,4 @@
 import { AppLayout } from "@/components/AppLayout";
-import PlaybackPreviewPlayer from "@/components/PlaybackPreviewPlayer";
 import PostCritiqueAI from "@/components/critique/PostCritiqueAI";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CritiqueFeedbackOptions from "../../components/adjudicator/CritiqueFeedbackOptions";
 import { getCritiqueFeedbackById } from "../../lib/critiqueService";
+import { DANCE_CRITIQUES_BUCKET } from "../../lib/storage";
+import { supabase } from "../../lib/supabase";
 
 interface CritiqueData {
   id: string;
@@ -29,9 +30,13 @@ interface CritiqueFormData {
 const ReviewCritique: React.FC = () => {
   const { critiqueFeedbackId } = useParams<{ critiqueFeedbackId: string }>();
   const navigate = useNavigate();
-  const [critique, setCritique] = useState<CritiqueData | null>(null);
+  const [critique, setCritique] = useState<any | null>(null);
+  // CritiqueData
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [critiqueFeedbackVideoSrc, setCritiqueFeedbackVideoSrc] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const loadCritiqueFeedback = async () => {
@@ -43,13 +48,21 @@ const ReviewCritique: React.FC = () => {
           throw new Error("No critique feedback ID provided");
         }
 
-        const critiqueFeedback = await getCritiqueFeedbackById(
+        const { data: critiqueFeedback } = await getCritiqueFeedbackById(
           critiqueFeedbackId
         );
 
-        console.log(critiqueFeedback);
+        const { data, error } = await supabase.storage
+          .from(DANCE_CRITIQUES_BUCKET)
+          .createSignedUrl(
+            `${critiqueFeedback.feedback_video.file_name}`,
+            3600
+          );
 
-        // setCritique(critiqueData);
+        setCritiqueFeedbackVideoSrc(data?.signedUrl);
+        // console.log(critiqueFeedback);
+
+        setCritique(critiqueFeedback);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load critique"
@@ -120,27 +133,36 @@ const ReviewCritique: React.FC = () => {
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">{critique.videoTitle}</h1>
+              <h1 className="text-3xl font-bold">
+                {critique.client_video.title}
+              </h1>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Play className="h-5 w-5 mr-2" />
-                  Video Critique
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PlaybackPreviewPlayer
-                  videoId={critique.videoId}
-                  critiqueId={critique.id}
-                />
-              </CardContent>
-            </Card>
+            {critiqueFeedbackVideoSrc && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Play className="h-5 w-5 mr-2" />
+                    Video Critique
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <video
+                    src={critiqueFeedbackVideoSrc}
+                    controls
+                    className="w-full h-full object-contain"
+                  />
+                  {/* <PlaybackPreviewPlayer
+                    videoId={critiqueFeedbackVideoSrc}
+                    critiqueId={critique.id}
+                  /> */}
+                </CardContent>
+              </Card>
+            )}
 
             <PostCritiqueAI
               critiqueId={critique.id}

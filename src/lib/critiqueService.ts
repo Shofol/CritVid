@@ -154,6 +154,7 @@ export const saveCritiqueFeedback = async (
   critiqueId?: string,
   reviewId?: string,
   videoBlob?: Blob,
+  audioBlob?: Blob,
   exercises?: string,
   suggestions?: string,
   transcription?: string,
@@ -200,12 +201,13 @@ export const saveCritiqueFeedback = async (
     let feedbackVideoId: number | undefined;
 
     // Step 2: Upload video to storage if provided, using feedback ID as filename
-    if (videoBlob) {
+    if (videoBlob && audioBlob) {
       try {
         console.log("📹 Uploading video to storage...");
 
         // Use feedback ID as filename
         const fileName = `${feedbackId}.webm`;
+        const audioFileName = `${feedbackId}.mp3`;
 
         // Upload to dance-critiques bucket
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -223,6 +225,20 @@ export const saveCritiqueFeedback = async (
 
         console.log("✅ Video uploaded successfully:", uploadData.path);
 
+        const { data: audioUploadData, error: audioUploadError } =
+          await supabase.storage
+            .from("dance-critiques")
+            .upload(audioFileName, audioBlob, {
+              cacheControl: "3600",
+              upsert: false,
+              contentType: "audio/mp3",
+            });
+        if (audioUploadError) {
+          console.error("Error uploading audio:", audioUploadError);
+          throw audioUploadError;
+        }
+        console.log("✅ Audio uploaded successfully:", audioUploadData.path);
+
         // Create a record in the critique_videos table
         const { data: videoRecordData, error: videoError } = await supabase
           .from("critique_videos")
@@ -232,6 +248,10 @@ export const saveCritiqueFeedback = async (
               file_path: uploadData.path,
               file_size: videoBlob.size,
               file_type: "video/webm",
+              audio_file_name: audioFileName,
+              audio_file_path: audioUploadData.path,
+              audio_file_size: audioBlob.size,
+              audio_file_type: "audio/mp3",
               user_id: userId,
               adjudicator_id: adjudicatorId,
             },
@@ -244,9 +264,6 @@ export const saveCritiqueFeedback = async (
         }
         feedbackVideoId = videoRecordData[0].id;
         console.log("✅ Created video record with ID:", feedbackVideoId);
-
-        console.log(feedbackVideoId);
-        console.log(feedbackId);
 
         // Step 3: Update the feedback record with the video ID
         const { error: updateError } = await supabase
