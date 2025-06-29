@@ -22,6 +22,18 @@ export const GET_CRITIQUE_FEEDBACK_BY_ID_FUNCTION = `${
   import.meta.env.VITE_SUPABASE_URL
 }/functions/v1/get-critique-feedback-by-id`;
 
+export const UPDATE_CRITIQUE_FEEDBACK_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/update-critique-feedback`;
+
 export const SAVE_CRITIQUE_FEEDBACK_FUNCTION = `${
   import.meta.env.VITE_SUPABASE_URL
 }/functions/v1/save-critiuqe-feedback`;
+
+export const TRANSCRIBE_AUDIO_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/transcribe-audio`;
+
+export const GENERATE_DANCE_EXERCISES_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/generate-exercises`;

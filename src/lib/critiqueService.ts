@@ -3,6 +3,7 @@ import {
   GET_CRITIQUE_BY_ID_FUNCTION,
   GET_CRITIQUE_FEEDBACK_BY_ID_FUNCTION,
   SAVE_CRITIQUE_FEEDBACK_FUNCTION,
+  UPDATE_CRITIQUE_FEEDBACK_FUNCTION,
 } from "../config/constants";
 import { supabase } from "../lib/supabase";
 import { Critique, CritiqueFeedback } from "../types/critiqueTypes";
@@ -336,6 +337,58 @@ export const getCritiqueFeedbackById = async (
     };
   } catch (error) {
     console.error("Error fetching critique feedback:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+// Update critique feedback
+export const updateCritiqueFeedback = async (
+  feedbackId: string,
+  exercises?: string,
+  suggestions?: string,
+  transcription?: string,
+  note?: string
+): Promise<{
+  success: boolean;
+  feedbackId?: string;
+  error?: string;
+}> => {
+  try {
+    const token = await getAuthToken();
+    if (!token) throw new Error("No access token available");
+
+    console.log("📝 Updating feedback data...");
+    const response = await fetch(UPDATE_CRITIQUE_FEEDBACK_FUNCTION, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        feedbackId,
+        exercises,
+        suggestions,
+        transcription,
+        note,
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to update critique feedback");
+    }
+
+    console.log("✅ Feedback updated successfully:", result.feedbackId);
+
+    return {
+      success: true,
+      feedbackId: result.feedbackId,
+    };
+  } catch (error) {
+    console.error("Error updating critique feedback:", error);
     return {
       success: false,
       error: error.message,

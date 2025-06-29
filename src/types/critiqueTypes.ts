@@ -156,87 +156,43 @@ export interface TimelineEvent {
 }
 
 export interface CritiqueFeedback {
-  id: string;
   created_at: string;
-  user_id?: string | null;
-  adjudicator_id?: string | null;
-  client_video_id?: number | null;
-  status?: string | null;
-  feedback_video_id?: number | null;
-  completion_date?: string | null;
-  review_id?: string | null;
-  critique_id?: string | null;
-  exercises?: string | null;
-  suggestions?: string | null;
-  transcription?: string | null;
-  note?: string | null;
+  user_id: string;
+  adjudicator_id: string;
+  client_video_id: number;
+  status: string;
+  feedback_video_id: number;
+  completion_date: string;
+  id: string;
+  review_id: string;
+  critique_id: string;
+  exercises: string;
+  suggestions: string;
+  transcription: string;
+  note: string;
+  client_video: ClientVideo;
+  feedback_video: FeedbackVideo;
+}
 
-  // Related data from joins
-  user?: {
-    id: string;
-    email: string;
-    full_name: string;
-    avatar_url?: string;
-    role: string;
-    is_verified: boolean;
-    created_at: string;
-    updated_at: string;
-  };
-  adjudicator?: {
-    id: string;
-    user_id: string;
-    full_name: string;
-    bio?: string;
-    specializations?: string;
-    experience_years?: number;
-    certifications?: string;
-    profile_image_url?: string;
-    is_verified: boolean;
-    status: string;
-    created_at: string;
-    updated_at: string;
-  };
-  client_video?: {
-    id: number;
-    title: string;
-    dance_style: number;
-    feedback_requested: string;
-    user_id: string;
-    video_path?: string;
-    file_name?: string;
-    duration?: number;
-    size?: number;
-    created_at: string;
-  };
-  feedback_video?: {
-    id: number;
-    file_path?: string;
-    file_name?: string;
-    file_size?: number;
-    file_type?: string;
-    user_id: string;
-    adjudicator_id?: string;
-    created_at: string;
-  };
-  critique?: {
-    id: string;
-    user_id: string;
-    adjudicator_id: string;
-    video_id: number;
-    status: string;
-    price: number;
-    assigned_at?: string;
-    completed_at?: string;
-    created_at: string;
-    updated_at: string;
-  };
-  review?: {
-    id: string;
-    adjudicator_id: string;
-    review: string;
-    rating: number;
-    client_id: string;
-    critique_id?: string;
-    created_at: string;
-  };
+export interface ClientVideo {
+  id: number;
+  title: string;
+  dance_style: DanceStyle;
+}
+
+export interface FeedbackVideo {
+  id: number;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  file_type: string;
+  audio_file_name: string;
+  audio_file_path: string;
+  audio_file_size: string;
+  audio_file_type: string;
+}
+
+export interface DanceStyle {
+  id: number;
+  name: string;
 }
