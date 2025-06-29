@@ -79,6 +79,7 @@ Deno.serve(async (req) => {
       note: string | null;
       critique_id?: string;
       review_id?: string;
+      feedback_video_id?: number;
     } = {
       user_id: userId,
       adjudicator_id: adjudicatorId,
@@ -90,6 +91,7 @@ Deno.serve(async (req) => {
       note: note || null,
       critique_id: critiqueId || null,
       review_id: reviewId || null,
+      feedback_video_id: feedbackVideoId || null,
     };
 
     console.log("📝 Inserting data:", insertData);

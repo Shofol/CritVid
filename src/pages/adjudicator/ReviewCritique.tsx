@@ -4,12 +4,11 @@ import PostCritiqueAI from "@/components/critique/PostCritiqueAI";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockCritiques, mockVideoSubmissions } from "@/data/mockData";
-import { CritiquePaymentStatus, paymentService } from "@/lib/paymentService";
 import { ArrowLeft, Play } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CritiqueFeedbackOptions from "../../components/adjudicator/CritiqueFeedbackOptions";
+import { getCritiqueFeedbackById } from "../../lib/critiqueService";
 
 interface CritiqueData {
   id: string;
@@ -21,69 +20,36 @@ interface CritiqueData {
   audioUrl?: string;
 }
 
+interface CritiqueFormData {
+  transcription: string;
+  aiSuggestions: string[];
+  rating: number;
+}
+
 const ReviewCritique: React.FC = () => {
-  const { critiqueId } = useParams<{ critiqueId: string }>();
+  const { critiqueFeedbackId } = useParams<{ critiqueFeedbackId: string }>();
   const navigate = useNavigate();
   const [critique, setCritique] = useState<CritiqueData | null>(null);
-  const [paymentStatus, setPaymentStatus] =
-    useState<CritiquePaymentStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadCritique = async () => {
+    const loadCritiqueFeedback = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        if (!critiqueId) {
-          throw new Error("No critique ID provided");
+        if (!critiqueFeedbackId) {
+          throw new Error("No critique feedback ID provided");
         }
 
-        // Find critique in mock data
-        const foundCritique = Array.isArray(mockCritiques)
-          ? mockCritiques.find((c) => c && c.id === critiqueId)
-          : null;
-
-        if (!foundCritique) {
-          throw new Error("Critique not found");
-        }
-
-        // Find associated video
-        const video = Array.isArray(mockVideoSubmissions)
-          ? mockVideoSubmissions.find(
-              (v) => v && v.id === foundCritique.submissionId
-            )
-          : null;
-
-        const critiqueData: CritiqueData = {
-          id: foundCritique.id,
-          videoId: foundCritique.submissionId,
-          videoTitle: video?.title || "Unknown Video",
-          adjudicatorName: "Professional Adjudicator",
-          createdAt: new Date(foundCritique.createdAt).toLocaleDateString(),
-          status: "completed",
-          audioUrl: foundCritique.voiceOverUrl,
-        };
-
-        setCritique(critiqueData);
-
-        // Load payment status
-        const status = await paymentService.getCritiquePaymentStatus(
-          critiqueId
+        const critiqueFeedback = await getCritiqueFeedbackById(
+          critiqueFeedbackId
         );
-        if (status) {
-          setPaymentStatus(status);
-        } else {
-          // Mock payment status for demo
-          setPaymentStatus({
-            id: critiqueId,
-            payment_status: "pending_approval",
-            auto_approved: false,
-            finalized_at: new Date().toISOString(),
-            disputed: false,
-          });
-        }
+
+        console.log(critiqueFeedback);
+
+        // setCritique(critiqueData);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load critique"
@@ -93,11 +59,25 @@ const ReviewCritique: React.FC = () => {
       }
     };
 
-    loadCritique();
-  }, [critiqueId]);
+    loadCritiqueFeedback();
+  }, [critiqueFeedbackId]);
 
-  const handlePaymentStatusUpdate = (newStatus: CritiquePaymentStatus) => {
-    setPaymentStatus(newStatus);
+  const handleSaveFeedback = async (feedbackData: CritiqueFormData) => {
+    try {
+      // Here you would typically save the feedback to your backend
+      console.log("Saving feedback:", feedbackData);
+
+      // For now, we'll just log the data
+      // In a real implementation, you would call an API to save the feedback
+      // await saveCritiqueFeedback(critiqueId!, feedbackData);
+
+      // You could also show a success toast here
+      // toast.success("Feedback saved successfully");
+    } catch (error) {
+      console.error("Failed to save feedback:", error);
+      // You could show an error toast here
+      // toast.error("Failed to save feedback");
+    }
   };
 
   if (loading) {
@@ -171,6 +151,8 @@ const ReviewCritique: React.FC = () => {
             <CritiqueFeedbackOptions
               critiqueId={critique.id}
               audioUrl={critique.audioUrl}
+              onSave={handleSaveFeedback}
+              isEditing={true}
             />
           </div>
         </div>

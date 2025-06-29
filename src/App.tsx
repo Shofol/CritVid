@@ -730,7 +730,7 @@ function App() {
         }
       />
       <Route
-        path="/adjudicator/review-critique/:critiqueId"
+        path="/adjudicator/review-critique/:critiqueFeedbackId"
         element={
           <ProtectedRoute>
             <Suspense fallback={<PageLoader />}>

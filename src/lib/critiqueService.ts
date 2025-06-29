@@ -1,10 +1,11 @@
 import {
   ASSIGN_CRITIQUE_FUNCTION,
   GET_CRITIQUE_BY_ID_FUNCTION,
+  GET_CRITIQUE_FEEDBACK_BY_ID_FUNCTION,
   SAVE_CRITIQUE_FEEDBACK_FUNCTION,
 } from "../config/constants";
 import { supabase } from "../lib/supabase";
-import { Critique } from "../types/critiqueTypes";
+import { Critique, CritiqueFeedback } from "../types/critiqueTypes";
 import { getAuthToken } from "./authUtils";
 
 // Save critique record
@@ -241,9 +242,11 @@ export const saveCritiqueFeedback = async (
           console.error("Error creating video record:", videoError);
           throw videoError;
         }
-
         feedbackVideoId = videoRecordData[0].id;
         console.log("✅ Created video record with ID:", feedbackVideoId);
+
+        console.log(feedbackVideoId);
+        console.log(feedbackId);
 
         // Step 3: Update the feedback record with the video ID
         const { error: updateError } = await supabase
@@ -275,6 +278,47 @@ export const saveCritiqueFeedback = async (
     };
   } catch (error) {
     console.error("Error saving critique feedback:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+// Get critique feedback by ID with all foreign key data
+export const getCritiqueFeedbackById = async (
+  feedbackId: string
+): Promise<{
+  success: boolean;
+  data?: CritiqueFeedback;
+  error?: string;
+}> => {
+  try {
+    const token = await getAuthToken();
+    if (!token) throw new Error("No access token available");
+
+    const response = await fetch(
+      `${GET_CRITIQUE_FEEDBACK_BY_ID_FUNCTION}/${feedbackId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to fetch critique feedback");
+    }
+
+    return {
+      success: true,
+      data: result.data,
+    };
+  } catch (error) {
+    console.error("Error fetching critique feedback:", error);
     return {
       success: false,
       error: error.message,
