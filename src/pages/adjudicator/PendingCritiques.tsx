@@ -34,7 +34,7 @@ const PendingCritiques: React.FC = () => {
       }
     };
     fetchPendingCritiques();
-  }, []);
+  }, [user]);
 
   if (loading) {
     return (

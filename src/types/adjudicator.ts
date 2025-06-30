@@ -95,6 +95,7 @@ export interface Adjudicator {
   approved: boolean;
   created_at: string;
   user_id: string;
+  is_active: boolean;
   // Calculated fields
   rating: number;
   review_count: number;
