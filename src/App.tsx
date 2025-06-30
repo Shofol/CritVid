@@ -93,6 +93,9 @@ const AdjudicatorSupport = React.lazy(
 const ReviewCritique = React.lazy(
   () => import("@/pages/adjudicator/ReviewCritique")
 );
+const ViewCritiqueFeedback = React.lazy(
+  () => import("@/pages/adjudicator/ViewCritiqueFeedback")
+);
 
 // Studio pages
 const StudioDashboard = React.lazy(() => import("@/pages/studio/Dashboard"));
@@ -735,6 +738,16 @@ function App() {
           <ProtectedRoute>
             <Suspense fallback={<PageLoader />}>
               <ReviewCritique />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/adjudicator/view-critique-feedback/:critiqueFeedbackId"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ViewCritiqueFeedback />
             </Suspense>
           </ProtectedRoute>
         }

@@ -18,6 +18,10 @@ export const GET_CRITIQUE_BY_ID_FUNCTION = `${
   import.meta.env.VITE_SUPABASE_URL
 }/functions/v1/get-critique-by-id`;
 
+export const GET_CRITIQUE_FEEDBACKS_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/get-critique-feedbacks`;
+
 export const GET_CRITIQUE_FEEDBACK_BY_ID_FUNCTION = `${
   import.meta.env.VITE_SUPABASE_URL
 }/functions/v1/get-critique-feedback-by-id`;

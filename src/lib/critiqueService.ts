@@ -2,6 +2,7 @@ import {
   ASSIGN_CRITIQUE_FUNCTION,
   GET_CRITIQUE_BY_ID_FUNCTION,
   GET_CRITIQUE_FEEDBACK_BY_ID_FUNCTION,
+  GET_CRITIQUE_FEEDBACKS_FUNCTION,
   SAVE_CRITIQUE_FEEDBACK_FUNCTION,
   UPDATE_CRITIQUE_FEEDBACK_FUNCTION,
 } from "../config/constants";
@@ -141,6 +142,57 @@ export const getAdjudicatorCritiques = async (
   status?: string
 ): Promise<Critique[]> => {
   return getCritiques({ adjudicatorId, userId, status });
+};
+
+// Get critiques using the new edge function
+export const getCritiqueFeedbacks = async (params?: {
+  adjudicatorId?: string;
+  userId?: string;
+  status?: string;
+}): Promise<CritiqueFeedback[]> => {
+  try {
+    const token = await getAuthToken();
+    if (!token) throw new Error("No access token available");
+
+    const url = new URL(`${GET_CRITIQUE_FEEDBACKS_FUNCTION}`);
+
+    if (params?.adjudicatorId) {
+      url.searchParams.set("adjudicator_id", params.adjudicatorId);
+    }
+    if (params?.userId) {
+      url.searchParams.set("user_id", params.userId);
+    }
+    if (params?.status) {
+      url.searchParams.set("status", params.status);
+    }
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to fetch critiques");
+    }
+
+    return result.data || [];
+  } catch (error) {
+    console.error("Error fetching critiques:", error);
+    throw error;
+  }
+};
+
+// Get critique feedbacks for adjudicator
+export const getAdjudicatorCritiqueFeedbacks = async (
+  adjudicatorId: string,
+  userId?: string,
+  status?: string
+): Promise<CritiqueFeedback[]> => {
+  return getCritiqueFeedbacks({ adjudicatorId, userId, status });
 };
 
 // Get all critiques for a user

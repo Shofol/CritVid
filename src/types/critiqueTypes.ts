@@ -2,6 +2,8 @@
  * Types for the critique editor and player
  */
 
+import { Review } from "./adjudicator";
+
 export interface VideoMetadata {
   id: string;
   title: string;
@@ -164,15 +166,22 @@ export interface CritiqueFeedback {
   feedback_video_id: number;
   completion_date: string;
   id: string;
-  review_id: string;
+  review: Review;
   critique_id: string;
   exercises: string;
   suggestions: string;
   transcription: string;
   note: string;
   written_feedback: string;
+  critique: Critique;
+  user: User;
   client_video: ClientVideo;
   feedback_video: FeedbackVideo;
+}
+
+export interface User {
+  id: string;
+  full_name: string;
 }
 
 export interface ClientVideo {
