@@ -137,9 +137,10 @@ export const getPendingCritiques = async (
 // Get critiques for adjudicator
 export const getAdjudicatorCritiques = async (
   adjudicatorId: string,
+  userId?: string,
   status?: string
 ): Promise<Critique[]> => {
-  return getCritiques({ adjudicatorId, status });
+  return getCritiques({ adjudicatorId, userId, status });
 };
 
 // Get all critiques for a user
@@ -346,11 +347,13 @@ export const getCritiqueFeedbackById = async (
 
 // Update critique feedback
 export const updateCritiqueFeedback = async (
+  critiqueId: string,
   feedbackId: string,
   exercises?: string,
   suggestions?: string,
   transcription?: string,
-  note?: string
+  note?: string,
+  written_feedback?: string
 ): Promise<{
   success: boolean;
   feedbackId?: string;
@@ -368,11 +371,13 @@ export const updateCritiqueFeedback = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        critiqueId,
         feedbackId,
         exercises,
         suggestions,
         transcription,
         note,
+        written_feedback,
       }),
     });
 

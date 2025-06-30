@@ -170,6 +170,7 @@ export interface CritiqueFeedback {
   suggestions: string;
   transcription: string;
   note: string;
+  written_feedback: string;
   client_video: ClientVideo;
   feedback_video: FeedbackVideo;
 }

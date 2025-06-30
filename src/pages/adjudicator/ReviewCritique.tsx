@@ -3,29 +3,28 @@ import PostCritiqueAI from "@/components/critique/PostCritiqueAI";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Play, Save } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import CritiqueFeedbackOptions from "../../components/adjudicator/CritiqueFeedbackOptions";
+import { toast } from "sonner";
 import {
   getCritiqueFeedbackById,
   updateCritiqueFeedback,
 } from "../../lib/critiqueService";
 import { Exercise } from "../../lib/exerciseService";
 import { DANCE_CRITIQUES_BUCKET } from "../../lib/storage";
+import { Suggestion } from "../../lib/suggestionService";
 import { supabase } from "../../lib/supabase";
 import { CritiqueFeedback } from "../../types/critiqueTypes";
-
-interface CritiqueFormData {
-  transcription: string;
-  aiSuggestions: string[];
-  rating: number;
-}
 
 interface AICritiqueFormData {
   transcription: string;
   exercises: Exercise[];
+  suggestions: Suggestion[];
   notes: string;
+  writtenFeedback: string;
 }
 
 const ReviewCritique: React.FC = () => {
@@ -40,12 +39,9 @@ const ReviewCritique: React.FC = () => {
   const [aiFormData, setAiFormData] = useState<AICritiqueFormData>({
     transcription: "",
     exercises: [],
+    suggestions: [],
     notes: "",
-  });
-  const [feedbackFormData, setFeedbackFormData] = useState<CritiqueFormData>({
-    transcription: "",
-    aiSuggestions: [],
-    rating: 0,
+    writtenFeedback: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -98,23 +94,24 @@ const ReviewCritique: React.FC = () => {
           }
         }
 
-        if (critiqueFeedback.note) {
-          setAiFormData((prev) => ({
-            ...prev,
-            notes: critiqueFeedback.note,
-          }));
-        }
-
         if (critiqueFeedback.suggestions) {
           try {
             const suggestions = JSON.parse(critiqueFeedback.suggestions);
-            setFeedbackFormData((prev) => ({
+            setAiFormData((prev) => ({
               ...prev,
-              aiSuggestions: Array.isArray(suggestions) ? suggestions : [],
+              suggestions: Array.isArray(suggestions) ? suggestions : [],
             }));
           } catch (e) {
             console.warn("Failed to parse suggestions JSON:", e);
           }
+        }
+
+        if (critiqueFeedback.note) {
+          setAiFormData((prev) => ({
+            ...prev,
+            notes: critiqueFeedback.note,
+            writtenFeedback: critiqueFeedback.note,
+          }));
         }
       } catch (err) {
         setError(
@@ -130,19 +127,32 @@ const ReviewCritique: React.FC = () => {
 
   // Memoize the callback to prevent infinite re-renders
   const handleAiFormDataChange = useCallback((data: AICritiqueFormData) => {
-    setAiFormData(data);
+    setAiFormData((prev) => ({
+      ...prev,
+      transcription: data.transcription,
+      exercises: data.exercises,
+      suggestions: data.suggestions,
+      notes: data.notes,
+      writtenFeedback: prev.writtenFeedback,
+    }));
   }, []);
 
-  const handleSaveFeedback = useCallback(
-    async (feedbackData: CritiqueFormData) => {
-      setFeedbackFormData(feedbackData);
-    },
-    []
-  );
+  const handleWrittenFeedbackChange = useCallback((value: string) => {
+    setAiFormData((prev) => ({
+      ...prev,
+      writtenFeedback: value,
+    }));
+  }, []);
 
   const handleSubmitAll = async () => {
     if (!critiqueFeedbackId) {
       setError("No critique feedback ID available");
+      return;
+    }
+
+    // Validate that we have at least 5 suggestions
+    if (aiFormData.suggestions.length < 5) {
+      setError("At least 5 suggestions are required for submission");
       return;
     }
 
@@ -152,21 +162,24 @@ const ReviewCritique: React.FC = () => {
     try {
       // Prepare data for submission
       const exercisesJson = JSON.stringify(aiFormData.exercises);
-      const suggestionsJson = JSON.stringify(feedbackFormData.aiSuggestions);
+      const suggestionsJson = JSON.stringify(aiFormData.suggestions);
 
       const result = await updateCritiqueFeedback(
+        critique?.critique_id,
         critiqueFeedbackId,
         exercisesJson,
         suggestionsJson,
         aiFormData.transcription,
-        aiFormData.notes
+        aiFormData.notes,
+        aiFormData.writtenFeedback
       );
 
       if (result.success) {
         setSubmitSuccess(true);
         console.log("✅ Critique feedback updated successfully");
         // You could show a success toast here
-        // toast.success("Critique feedback updated successfully");
+        toast.success("Critique feedback updated successfully");
+        navigate(`/adjudicator/dashboard`);
       } else {
         throw new Error(result.error || "Failed to update critique feedback");
       }
@@ -231,7 +244,7 @@ const ReviewCritique: React.FC = () => {
           </div>
           <Button
             onClick={handleSubmitAll}
-            disabled={isSubmitting}
+            disabled={isSubmitting || aiFormData.suggestions.length < 5}
             className="flex items-center"
           >
             <Save className="h-4 w-4 mr-2" />
@@ -247,45 +260,68 @@ const ReviewCritique: React.FC = () => {
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            {critiqueFeedbackVideoSrc && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Play className="h-5 w-5 mr-2" />
-                    Video Critique
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <video
-                    src={critiqueFeedbackVideoSrc}
-                    controls
-                    className="w-full h-full object-contain"
-                  />
-                </CardContent>
-              </Card>
-            )}
+        {aiFormData.suggestions.length < 5 && (
+          <Alert className="mb-6">
+            <AlertDescription className="text-amber-800">
+              ⚠️ At least 5 suggestions are required for submission. Currently
+              have {aiFormData.suggestions.length}/5.
+            </AlertDescription>
+          </Alert>
+        )}
 
-            <PostCritiqueAI
-              danceStyle={critique.client_video?.dance_style.name}
-              audioUrl={critique.feedback_video?.audio_file_path}
-              onFormDataChange={handleAiFormDataChange}
-              initialData={{
-                transcription: aiFormData.transcription,
-                exercises: aiFormData.exercises,
-                notes: aiFormData.notes,
-              }}
-            />
-          </div>
-          <div className="space-y-6">
-            <CritiqueFeedbackOptions
-              critiqueId={critique.id}
-              audioUrl={critique.feedback_video?.file_path}
-              onSave={handleSaveFeedback}
-              isEditing={true}
-            />
-          </div>
+        <div className="space-y-6">
+          {critiqueFeedbackVideoSrc && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Play className="h-5 w-5 mr-2" />
+                  Video Critique
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <video
+                  src={critiqueFeedbackVideoSrc}
+                  controls
+                  className="w-full h-full object-contain"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Written Feedback Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Written Feedback</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="writtenFeedback">Detailed Feedback</Label>
+                  <Textarea
+                    id="writtenFeedback"
+                    placeholder="Provide detailed written feedback for the dancer..."
+                    value={aiFormData.writtenFeedback}
+                    onChange={(e) =>
+                      handleWrittenFeedbackChange(e.target.value)
+                    }
+                    className="min-h-[120px]"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <PostCritiqueAI
+            danceStyle={critique.client_video?.dance_style.name}
+            audioUrl={critique.feedback_video?.audio_file_path}
+            onFormDataChange={handleAiFormDataChange}
+            initialData={{
+              transcription: aiFormData.transcription,
+              exercises: aiFormData.exercises,
+              suggestions: aiFormData.suggestions,
+              notes: aiFormData.notes,
+            }}
+          />
         </div>
       </div>
     </AppLayout>

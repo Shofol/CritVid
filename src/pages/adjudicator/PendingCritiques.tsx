@@ -20,7 +20,11 @@ const PendingCritiques: React.FC = () => {
           setLoading(true);
           // Get the adjudicator ID from the user's profile or context
           // For now, we'll use the user ID as adjudicator ID
-          const data = await getAdjudicatorCritiques(adjudicator.id, "pending");
+          const data = await getAdjudicatorCritiques(
+            adjudicator.id,
+            null,
+            "pending"
+          );
           setPendingCritiques(data);
         } catch (error) {
           console.error("Error fetching pending critiques:", error);

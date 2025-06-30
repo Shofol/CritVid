@@ -29,8 +29,14 @@ Deno.serve(async (req) => {
     );
 
     // Get request data
-    const { feedbackId, exercises, suggestions, transcription, note } =
-      await req.json();
+    const {
+      feedbackId,
+      exercises,
+      suggestions,
+      transcription,
+      note,
+      written_feedback,
+    } = await req.json();
 
     console.log("📝 Received update parameters:", {
       feedbackId,
@@ -38,6 +44,7 @@ Deno.serve(async (req) => {
       suggestions,
       transcription,
       note,
+      written_feedback,
     });
 
     if (!feedbackId) {
@@ -61,12 +68,15 @@ Deno.serve(async (req) => {
       suggestions?: string | null;
       transcription?: string | null;
       note?: string | null;
+      written_feedback?: string | null;
     } = {};
 
     if (exercises !== undefined) updateData.exercises = exercises;
     if (suggestions !== undefined) updateData.suggestions = suggestions;
     if (transcription !== undefined) updateData.transcription = transcription;
     if (note !== undefined) updateData.note = note;
+    if (written_feedback !== undefined)
+      updateData.written_feedback = written_feedback;
 
     console.log("📝 Updating data:", updateData);
 

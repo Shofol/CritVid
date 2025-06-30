@@ -8,6 +8,7 @@ import {
   X as Cancel,
   Edit,
   FileText,
+  Lightbulb,
   Loader2,
   MessageSquare,
   Plus,
@@ -18,6 +19,10 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Exercise, generateDanceExercises } from "../../lib/exerciseService";
 import { DANCE_CRITIQUES_BUCKET } from "../../lib/storage";
+import {
+  Suggestion,
+  generateDanceSuggestions,
+} from "../../lib/suggestionService";
 import { transcribeAudio } from "../../lib/transcriptionService";
 
 interface PostCritiqueAIProps {
@@ -26,22 +31,32 @@ interface PostCritiqueAIProps {
   onFormDataChange?: (data: {
     transcription: string;
     exercises: Exercise[];
+    suggestions: Suggestion[];
     notes: string;
+    writtenFeedback?: string;
   }) => void;
   initialData?: {
     transcription?: string;
     exercises?: Exercise[];
+    suggestions?: Suggestion[];
     notes?: string;
+    writtenFeedback?: string;
   };
 }
 
 interface AIData {
   transcription?: string;
   exercises?: Exercise[];
+  suggestions?: Suggestion[];
   loading: boolean;
 }
 
 interface EditableExercise extends Exercise {
+  id: string;
+  isEditing?: boolean;
+}
+
+interface EditableSuggestion extends Suggestion {
   id: string;
   isEditing?: boolean;
 }
@@ -54,14 +69,22 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
 }) => {
   const [aiData, setAiData] = useState<AIData>({ loading: true });
   const [notes, setNotes] = useState(initialData?.notes || "");
-  const [savedNotes, setSavedNotes] = useState("");
   const [exercises, setExercises] = useState<EditableExercise[]>(
     initialData?.exercises?.map((ex, index) => ({
       ...ex,
       id: `exercise-${index}`,
     })) || []
   );
+  const [suggestions, setSuggestions] = useState<EditableSuggestion[]>(
+    initialData?.suggestions?.map((s, index) => ({
+      ...s,
+      id: `suggestion-${index}`,
+    })) || []
+  );
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(
+    null
+  );
+  const [editingSuggestionId, setEditingSuggestionId] = useState<string | null>(
     null
   );
 
@@ -70,9 +93,12 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
     () => ({
       transcription: aiData.transcription || "",
       exercises: exercises.map(({ id, isEditing, ...exercise }) => exercise),
+      suggestions: suggestions.map(
+        ({ id, isEditing, ...suggestion }) => suggestion
+      ),
       notes: notes,
     }),
-    [aiData.transcription, exercises, notes]
+    [aiData.transcription, exercises, suggestions, notes]
   );
 
   // Memoize the callback to prevent it from changing on every render
@@ -96,6 +122,7 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
           transcription: result.transcription,
           loading: false,
         });
+
         // Generate exercises based on the transcription
         const exerciseResult = await generateDanceExercises(
           result.transcription,
@@ -112,10 +139,29 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
           id: `ai-generated-${index}`,
         }));
 
+        // Generate suggestions based on the transcription
+        const suggestionResult = await generateDanceSuggestions(
+          result.transcription,
+          danceStyle,
+          5
+        );
+
+        const generatedSuggestions = suggestionResult.success
+          ? suggestionResult.suggestions
+          : [];
+
+        // Convert to editable suggestions with IDs
+        const editableSuggestions = generatedSuggestions.map((s, index) => ({
+          ...s,
+          id: `ai-generated-suggestion-${index}`,
+        }));
+
         setExercises(editableExercises);
+        setSuggestions(editableSuggestions);
         setAiData({
           transcription: result.transcription,
           exercises: generatedExercises,
+          suggestions: generatedSuggestions,
           loading: false,
         });
       } else {
@@ -135,24 +181,25 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
       setAiData({
         transcription: initialData.transcription,
         exercises: initialData.exercises || [],
+        suggestions: initialData.suggestions || [],
         loading: false,
       });
     } else {
       setAiData({ loading: false });
     }
-  }, [audioUrl, initialData?.transcription, initialData?.exercises]);
+  }, [
+    audioUrl,
+    initialData?.transcription,
+    initialData?.exercises,
+    initialData?.suggestions,
+  ]);
 
   // Notify parent component of form data changes - only when formData actually changes
   useEffect(() => {
     memoizedOnFormDataChange(formData);
   }, [formData, memoizedOnFormDataChange]);
 
-  const handleSaveNotes = () => {
-    setSavedNotes(notes);
-    // Here you would typically save to backend
-    console.log("Saving notes:", notes);
-  };
-
+  // Exercise functions
   const addExercise = () => {
     const newExercise: EditableExercise = {
       id: `exercise-${Date.now()}`,
@@ -207,6 +254,86 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
     );
   };
 
+  // Suggestion functions
+  const addSuggestion = () => {
+    const newSuggestion: EditableSuggestion = {
+      id: `suggestion-${Date.now()}`,
+      description: "",
+      isEditing: true,
+    };
+    setSuggestions([...suggestions, newSuggestion]);
+    setEditingSuggestionId(newSuggestion.id);
+  };
+
+  const startEditingSuggestion = (suggestionId: string) => {
+    setEditingSuggestionId(suggestionId);
+    setSuggestions(
+      suggestions.map((s) =>
+        s.id === suggestionId ? { ...s, isEditing: true } : s
+      )
+    );
+  };
+
+  const saveSuggestion = (suggestionId: string) => {
+    setEditingSuggestionId(null);
+    setSuggestions(
+      suggestions.map((s) =>
+        s.id === suggestionId ? { ...s, isEditing: false } : s
+      )
+    );
+  };
+
+  const cancelEditingSuggestion = (suggestionId: string) => {
+    setEditingSuggestionId(null);
+    setSuggestions(
+      suggestions.map((s) =>
+        s.id === suggestionId ? { ...s, isEditing: false } : s
+      )
+    );
+  };
+
+  const deleteSuggestion = async (suggestionId: string) => {
+    // Remove the suggestion
+    const updatedSuggestions = suggestions.filter((s) => s.id !== suggestionId);
+    setSuggestions(updatedSuggestions);
+
+    // If we have less than 5 suggestions and have a transcription, generate a new one
+    if (updatedSuggestions.length < 5 && aiData.transcription) {
+      try {
+        const suggestionResult = await generateDanceSuggestions(
+          aiData.transcription,
+          danceStyle,
+          1
+        );
+
+        if (
+          suggestionResult.success &&
+          suggestionResult.suggestions?.length > 0
+        ) {
+          const newSuggestion: EditableSuggestion = {
+            ...suggestionResult.suggestions[0],
+            id: `ai-generated-suggestion-${Date.now()}`,
+          };
+          setSuggestions([...updatedSuggestions, newSuggestion]);
+        }
+      } catch (err) {
+        console.error("Failed to generate new suggestion:", err);
+      }
+    }
+  };
+
+  const updateSuggestionField = (
+    suggestionId: string,
+    field: keyof Suggestion,
+    value: string
+  ) => {
+    setSuggestions(
+      suggestions.map((s) =>
+        s.id === suggestionId ? { ...s, [field]: value } : s
+      )
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -217,7 +344,7 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="transcription" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="transcription">
               <FileText className="h-4 w-4 mr-1" />
               Transcription
@@ -225,6 +352,10 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
             <TabsTrigger value="exercises">
               <Target className="h-4 w-4 mr-1" />
               Exercises
+            </TabsTrigger>
+            <TabsTrigger value="suggestions">
+              <Lightbulb className="h-4 w-4 mr-1" />
+              Suggestions
             </TabsTrigger>
             <TabsTrigger value="notes">
               <MessageSquare className="h-4 w-4 mr-1" />
@@ -374,6 +505,117 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
             )}
           </TabsContent>
 
+          <TabsContent value="suggestions" className="space-y-4">
+            {aiData.loading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                <span>Generating improvement suggestions...</span>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Badge variant="secondary">AI Improvement Suggestions</Badge>
+                  <Button onClick={addSuggestion} size="sm" variant="outline">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Suggestion
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {suggestions.length > 0 ? (
+                    suggestions.map((suggestion) => (
+                      <div
+                        key={suggestion.id}
+                        className="p-3 bg-green-50 rounded-lg border border-green-200"
+                      >
+                        {suggestion.isEditing ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Lightbulb className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                              <div className="flex space-x-2">
+                                <Button
+                                  onClick={() => saveSuggestion(suggestion.id)}
+                                  size="sm"
+                                  variant="outline"
+                                >
+                                  <Save className="h-4 w-4 mr-1" />
+                                  Save
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    cancelEditingSuggestion(suggestion.id)
+                                  }
+                                  size="sm"
+                                  variant="outline"
+                                >
+                                  <Cancel className="h-4 w-4 mr-1" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                            <Textarea
+                              placeholder="Enter your suggestion..."
+                              value={suggestion.description}
+                              onChange={(e) =>
+                                updateSuggestionField(
+                                  suggestion.id,
+                                  "description",
+                                  e.target.value
+                                )
+                              }
+                              className="text-sm text-green-700"
+                              rows={3}
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start space-x-2 flex-1">
+                              <Lightbulb className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1">
+                                <p className="text-sm text-green-700">
+                                  {suggestion.description ||
+                                    "No suggestion provided"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex space-x-1 ml-2">
+                              <Button
+                                onClick={() =>
+                                  startEditingSuggestion(suggestion.id)
+                                }
+                                size="sm"
+                                variant="ghost"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                onClick={() => deleteSuggestion(suggestion.id)}
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground text-center py-8">
+                      No improvement suggestions available
+                    </p>
+                  )}
+                </div>
+                {suggestions.length > 0 && (
+                  <div className="text-xs text-muted-foreground text-center">
+                    {suggestions.length}/5 suggestions (minimum 5 required for
+                    submission)
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="notes" className="space-y-4">
             <div className="space-y-3">
               <label className="text-sm font-medium">Personal Notes</label>
@@ -383,16 +625,6 @@ const PostCritiqueAI: React.FC<PostCritiqueAIProps> = ({
                 onChange={(e) => setNotes(e.target.value)}
                 rows={6}
               />
-              <Button onClick={handleSaveNotes} size="sm">
-                Save Notes
-              </Button>
-              {savedNotes && (
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <p className="text-sm text-green-800">
-                    Notes saved successfully!
-                  </p>
-                </div>
-              )}
             </div>
           </TabsContent>
         </Tabs>
