@@ -45,3 +45,7 @@ export const GENERATE_DANCE_EXERCISES_FUNCTION = `${
 export const GENERATE_DANCE_SUGGESTIONS_FUNCTION = `${
   import.meta.env.VITE_SUPABASE_URL
 }/functions/v1/generate-suggestions`;
+
+export const SAVE_VIDEO_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/save-video`;

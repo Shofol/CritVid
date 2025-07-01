@@ -20,12 +20,12 @@ const ClientDashboard: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto py-6">
-        <h1 className="text-3xl font-bold mb-6">Client Dashboard</h1>
+      <div className="container mx-auto py-4">
+        <h1 className="text-2xl font-semibold mb-4">Dashboard</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content - Takes up 2 columns */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Main Content - Takes up 3 columns */}
+          <div className="lg:col-span-3 space-y-4">
             {/* Pending Approvals */}
             <PendingApprovals />
 
@@ -37,67 +37,56 @@ const ClientDashboard: React.FC = () => {
             >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="videos" className="flex items-center gap-2">
-                  📁 My Videos
+                  📁 Videos
                 </TabsTrigger>
                 <TabsTrigger
                   value="critiques"
                   className="flex items-center gap-2"
                 >
-                  🎥 My Critiques
+                  🎥 Critiques
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="videos" className="mt-6">
+              <TabsContent value="videos" className="mt-4">
                 <MyOriginalVideos />
               </TabsContent>
-              <TabsContent value="critiques" className="mt-6">
+              <TabsContent value="critiques" className="mt-4">
                 <MyCritiques />
               </TabsContent>
             </Tabs>
           </div>
 
           {/* Quick Actions Sidebar */}
-          <div className="space-y-6">
-            <div className="rounded-lg border bg-card text-card-foreground shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Upload Video</h2>
-              <p className="text-muted-foreground mb-4">
-                Upload a new dance video for critique
-              </p>
-              <Button asChild className="w-full">
-                <Link to="/upload-video">Upload Now</Link>
+          <div className="space-y-3">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
+              <h3 className="font-medium mb-2">Upload Video</h3>
+              <Button asChild size="sm" className="w-full">
+                <Link to="/upload-video">Upload</Link>
               </Button>
             </div>
 
-            <div className="rounded-lg border bg-card text-card-foreground shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Find an Adjudicator
-              </h2>
-              <p className="text-muted-foreground mb-4">
-                Browse our professional adjudicators
-              </p>
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/find-adjudicator">Browse Adjudicators</Link>
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
+              <h3 className="font-medium mb-2">Find Adjudicator</h3>
+              <Button asChild variant="outline" size="sm" className="w-full">
+                <Link to="/find-adjudicator">Browse</Link>
               </Button>
             </div>
 
-            <div className="rounded-lg border bg-card text-card-foreground shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Account</h2>
-              <p className="text-muted-foreground mb-4">
-                Manage your profile and billing
-              </p>
-              <div className="space-y-2">
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
+              <h3 className="font-medium mb-2">Account</h3>
+              <div className="space-y-1">
                 <Button
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start"
+                  className="w-full justify-start h-8"
                 >
-                  <Link to="/profile">Edit Profile</Link>
+                  <Link to="/profile">Profile</Link>
                 </Button>
                 <Button
                   asChild
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-start"
+                  className="w-full justify-start h-8"
                 >
                   <Link to="/client/billing">Billing</Link>
                 </Button>

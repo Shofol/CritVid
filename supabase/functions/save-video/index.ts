@@ -26,12 +26,32 @@ serve(async (req) => {
     );
 
     // Get request data
-    const { title, danceStyle, feedback, fileName, userId } = await req.json();
+    const { title, danceStyle, feedback, fileName, userId, duration, size } =
+      await req.json();
 
     if (!title || !danceStyle || !userId) {
       return new Response(
         JSON.stringify({
-          error: "Missing required fields",
+          error:
+            "Missing required fields: title, danceStyle, and userId are required",
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+          status: 400,
+        }
+      );
+    }
+
+    // Validate that danceStyle is a valid bigint
+    const danceStyleId = parseInt(danceStyle);
+    if (isNaN(danceStyleId)) {
+      return new Response(
+        JSON.stringify({
+          error:
+            "danceStyle must be a valid number (foreign key to dance_styles table)",
         }),
         {
           headers: {
@@ -49,10 +69,13 @@ serve(async (req) => {
       .insert([
         {
           title,
-          dance_style: danceStyle,
+          dance_style: danceStyleId,
           feedback_requested: feedback,
           user_id: userId,
           video_path: fileName ? `video-uploads/${userId}/${fileName}` : null,
+          file_name: fileName || null,
+          duration: duration || null,
+          size: size || null,
         },
       ])
       .select();

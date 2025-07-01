@@ -4,13 +4,7 @@ import ProfileEditorLink from "@/components/adjudicator/ProfileEditorLink";
 import ProfileStatusCard from "@/components/adjudicator/ProfileStatusCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useApp } from "@/contexts/AppContext";
@@ -98,8 +92,13 @@ const AdjudicatorDashboard: React.FC = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="container mx-auto py-6">
-          <h1 className="text-3xl font-bold mb-6">Loading...</h1>
+        <div className="container mx-auto py-4">
+          <div className="flex items-center justify-center h-32">
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-gray-600">Loading dashboard...</span>
+            </div>
+          </div>
         </div>
       </AppLayout>
     );
@@ -107,14 +106,20 @@ const AdjudicatorDashboard: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto py-6">
+      <div className="container mx-auto py-4 px-4">
+        {/* Header Section */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Adjudicator Dashboard</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Manage your critiques and account
+            </p>
+          </div>
           <ProfileEditorLink />
         </div>
 
         {/* Account Status Card */}
-        <div className="mb-8">
+        <div className="mb-6">
           <ProfileStatusCard
             isActive={profileData?.is_active ?? true}
             adjudicatorId={profileData?.id}
@@ -123,67 +128,112 @@ const AdjudicatorDashboard: React.FC = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatsCard
             title="Total Critiques"
             value={critiques.length.toString()}
+            icon="📊"
+            color="blue"
           />
-          <StatsCard title="Average Rating" value={` ⭐`} />
-          <StatsCard title="Total Earnings" value={``} />
+          <StatsCard
+            title="Average Rating"
+            value="4.8"
+            icon="⭐"
+            color="yellow"
+          />
+          <StatsCard
+            title="Total Earnings"
+            value="$2,450"
+            icon="💰"
+            color="green"
+          />
           <StatsCard
             title="Pending Critiques"
             value={pendingCritiques.length.toString()}
+            icon="⏳"
+            color="orange"
           />
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="pending">
-          <TabsList className="mb-4">
-            <TabsTrigger value="pending">Pending Critiques</TabsTrigger>
-            <TabsTrigger value="completed">Completed Critiques</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-          </TabsList>
+        <Card className="shadow-sm border-gray-200">
+          <Tabs defaultValue="pending" className="w-full">
+            <div className="border-b border-gray-200">
+              <TabsList className="bg-transparent border-b-0 rounded-none h-12">
+                <TabsTrigger
+                  value="pending"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent rounded-none"
+                >
+                  Pending Critiques ({pendingCritiques.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="completed"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent rounded-none"
+                >
+                  Completed Critiques ({completedCritiques.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="payments"
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent rounded-none"
+                >
+                  Payments
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-          <TabsContent value="pending">
-            <h2 className="text-xl font-semibold mb-4">Pending Critiques</h2>
-            {pendingCritiques.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4">
-                {pendingCritiques.map((critiqueFeedback) => (
-                  <PendingCritiqueCard
-                    key={critiqueFeedback.id}
-                    critiqueFeedback={critiqueFeedback}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground">
-                No pending critiques at this time.
-              </p>
-            )}
-          </TabsContent>
+            <div className="p-6">
+              <TabsContent value="pending" className="mt-0">
+                {pendingCritiques.length > 0 ? (
+                  <div className="space-y-3">
+                    {pendingCritiques.map((critiqueFeedback) => (
+                      <PendingCritiqueCard
+                        key={critiqueFeedback.id}
+                        critiqueFeedback={critiqueFeedback}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-gray-400 text-4xl mb-2">📭</div>
+                    <p className="text-gray-600 font-medium">
+                      No pending critiques
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      You're all caught up!
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
 
-          <TabsContent value="completed">
-            <h2 className="text-xl font-semibold mb-4">Completed Critiques</h2>
-            {completedCritiques.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4">
-                {completedCritiques.map((critiqueFeedback) => (
-                  <CompletedCritiqueCard
-                    key={critiqueFeedback.id}
-                    critiqueFeedback={critiqueFeedback}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground">
-                No completed critiques yet.
-              </p>
-            )}
-          </TabsContent>
+              <TabsContent value="completed" className="mt-0">
+                {completedCritiques.length > 0 ? (
+                  <div className="space-y-3">
+                    {completedCritiques.map((critiqueFeedback) => (
+                      <CompletedCritiqueCard
+                        key={critiqueFeedback.id}
+                        critiqueFeedback={critiqueFeedback}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-gray-400 text-4xl mb-2">📋</div>
+                    <p className="text-gray-600 font-medium">
+                      No completed critiques yet
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Start reviewing to see your completed work here
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
 
-          <TabsContent value="payments">
-            <PendingPayments />
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="payments" className="mt-0">
+                <PendingPayments />
+              </TabsContent>
+            </div>
+          </Tabs>
+        </Card>
       </div>
     </AppLayout>
   );
@@ -192,14 +242,33 @@ const AdjudicatorDashboard: React.FC = () => {
 interface StatsCardProps {
   title: string;
   value: string;
+  icon: string;
+  color: "blue" | "green" | "yellow" | "orange" | "purple";
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({ title, value }) => {
+const StatsCard: React.FC<StatsCardProps> = ({ title, value, icon, color }) => {
+  const colorClasses = {
+    blue: "bg-blue-50 border-blue-200 text-blue-700",
+    green: "bg-green-50 border-green-200 text-green-700",
+    yellow: "bg-yellow-50 border-yellow-200 text-yellow-700",
+    orange: "bg-orange-50 border-orange-200 text-orange-700",
+    purple: "bg-purple-50 border-purple-200 text-purple-700",
+  };
+
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-sm text-muted-foreground">{title}</p>
+    <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              {title}
+            </p>
+            <p className="text-xl font-bold text-gray-900 mt-1">{value}</p>
+          </div>
+          <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
+            <span className="text-lg">{icon}</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -219,25 +288,33 @@ const PendingCritiqueCard: React.FC<PendingCritiqueCardProps> = ({
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle>{critiqueFeedback.client_video.title}</CardTitle>
-            <CardDescription>
+    <Card className="border border-gray-200 hover:border-gray-300 transition-colors">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center space-x-3 mb-2">
+              <h3 className="font-semibold text-gray-900">
+                {critiqueFeedback.client_video.title}
+              </h3>
+              <Badge variant="secondary" className="text-xs">
+                {critiqueFeedback.client_video.dance_style.name}
+              </Badge>
+            </div>
+            <p className="text-sm text-gray-600 mb-1">
               Dancer: {critiqueFeedback.user.full_name}
-            </CardDescription>
+            </p>
+            <p className="text-xs text-gray-500">
+              Submitted:{" "}
+              {new Date(
+                critiqueFeedback.critique.created_at
+              ).toLocaleDateString()}
+            </p>
           </div>
-          <Badge>{critiqueFeedback.client_video.dance_style.name}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex justify-between items-center mb-4">
-          <div className="text-sm">
-            <p>Submitted: {critiqueFeedback.critique.created_at}</p>
-            <p className="font-medium">Due: </p>
-          </div>
-          <Button onClick={() => handleStartCritique(critiqueFeedback)}>
+          <Button
+            size="sm"
+            onClick={() => handleStartCritique(critiqueFeedback)}
+            className="ml-4"
+          >
             Start Critique
           </Button>
         </div>
@@ -254,25 +331,31 @@ const CompletedCritiqueCard: React.FC<CompletedCritiqueCardProps> = ({
   critiqueFeedback,
 }) => {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle>{critiqueFeedback.client_video.title}</CardTitle>
-            <CardDescription>
+    <Card className="border border-gray-200 hover:border-gray-300 transition-colors">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <div className="flex items-center space-x-3 mb-2">
+              <h3 className="font-semibold text-gray-900">
+                {critiqueFeedback.client_video.title}
+              </h3>
+              <Badge variant="secondary" className="text-xs">
+                {critiqueFeedback.client_video.dance_style.name}
+              </Badge>
+            </div>
+            <p className="text-sm text-gray-600 mb-1">
               Dancer: {critiqueFeedback.user.full_name}
-            </CardDescription>
+            </p>
+            <div className="flex items-center space-x-4 text-xs text-gray-500">
+              <span>Completed: {new Date().toLocaleDateString()}</span>
+              <span className="flex items-center">
+                Rating: {critiqueFeedback?.review?.rating || "N/A"} ⭐
+              </span>
+            </div>
           </div>
-          <Badge>{critiqueFeedback.client_video.dance_style.name}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex justify-between items-center">
-          <div className="text-sm">
-            <p>Completed: </p>
-            <p>Rating: {critiqueFeedback?.review?.rating} ⭐</p>
-          </div>
-          <Button variant="outline">View Critique</Button>
+          <Button size="sm" variant="outline" className="ml-4">
+            View Critique
+          </Button>
         </div>
       </CardContent>
     </Card>

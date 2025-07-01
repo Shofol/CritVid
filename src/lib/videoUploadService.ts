@@ -1,3 +1,4 @@
+import { SAVE_VIDEO_FUNCTION } from "../config/constants";
 import { getAuthToken } from "./authUtils";
 import { supabase } from "./supabase";
 
@@ -37,25 +38,22 @@ export const videoUploadService = {
         20
       )}.${fileExt}`;
 
-      const response = await fetch(
-        import.meta.env.VITE_VIDEO_UPLOAD_FUNCTION_URL,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${await getAuthToken()}`,
-          },
-          body: JSON.stringify({
-            title: data.title,
-            danceStyle: data.danceStyle,
-            feedback: data.feedback,
-            fileName,
-            userId,
-            duration: data.duration,
-            size: data.size,
-          }),
-        }
-      );
+      const response = await fetch(SAVE_VIDEO_FUNCTION, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getAuthToken()}`,
+        },
+        body: JSON.stringify({
+          title: data.title,
+          danceStyle: data.danceStyle,
+          feedback: data.feedback,
+          fileName,
+          userId,
+          duration: data.duration,
+          size: data.size,
+        }),
+      });
 
       const result = await response.json();
 
