@@ -1,5 +1,7 @@
+import { StripeConnectModal } from "@/components/adjudicator/StripeConnectModal";
 import { AppLayout } from "@/components/AppLayout";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,7 +17,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AlertCircle, CheckCircle, Clock, DollarSign } from "lucide-react";
+import {
+  StripeAccount,
+  stripeConnectService,
+} from "@/lib/stripeConnectService";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  DollarSign,
+  Loader2,
+  Settings,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Mock payment data
 const mockPayments = [
@@ -80,6 +95,78 @@ const getStatusBadge = (status: string) => {
 };
 
 export default function AdjudicatorPayments() {
+  const [isStripeModalOpen, setIsStripeModalOpen] = useState(false);
+  const [stripeStatus, setStripeStatus] = useState<{
+    hasAccount: boolean;
+    isComplete: boolean;
+    accountId?: string;
+  }>({ hasAccount: false, isComplete: false });
+  const [stripeAccount, setStripeAccount] = useState<StripeAccount | null>(
+    null
+  );
+  const [isLoadingAccount, setIsLoadingAccount] = useState(false);
+
+  useEffect(() => {
+    checkStripeStatus();
+  }, []);
+
+  const checkStripeStatus = async () => {
+    try {
+      const status = await stripeConnectService.checkAccountStatus();
+      setStripeStatus(status);
+
+      // If account exists, fetch the full account details
+      if (status.hasAccount) {
+        setIsLoadingAccount(true);
+        try {
+          const response = await stripeConnectService.getAccount();
+          if (response.account) {
+            setStripeAccount(response.account);
+          }
+        } catch (error) {
+          console.error("Error fetching account details:", error);
+        } finally {
+          setIsLoadingAccount(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking Stripe status:", error);
+    }
+  };
+
+  const handleConnectStripe = () => {
+    setIsStripeModalOpen(true);
+  };
+
+  const handleStripeModalClose = () => {
+    setIsStripeModalOpen(false);
+    checkStripeStatus(); // Refresh status when modal closes
+  };
+
+  const getStripeStatusBadge = () => {
+    if (!stripeStatus.hasAccount) {
+      return (
+        <Badge variant="outline" className="text-gray-600">
+          Not Connected
+        </Badge>
+      );
+    }
+    if (stripeStatus.isComplete) {
+      return (
+        <Badge variant="outline" className="text-green-600">
+          <CheckCircle className="w-3 h-3 mr-1" />
+          Connected
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="text-yellow-600">
+        <AlertCircle className="w-3 h-3 mr-1" />
+        Pending
+      </Badge>
+    );
+  };
+
   const totalPending = mockPayments
     .filter((p) => p.status === "pending")
     .reduce((sum, p) => sum + p.amount, 0);
@@ -95,7 +182,116 @@ export default function AdjudicatorPayments() {
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Payments</h1>
+          {!stripeStatus.hasAccount ? (
+            <Button
+              onClick={handleConnectStripe}
+              className="flex items-center gap-2"
+            >
+              <CreditCard className="w-4 h-4" />
+              Connect Stripe
+            </Button>
+          ) : (
+            <Button
+              onClick={handleConnectStripe}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <Settings className="w-4 h-4" />
+              Manage Stripe
+            </Button>
+          )}
         </div>
+
+        {/* Stripe Account Status Card - Show when connected */}
+        {stripeStatus.hasAccount && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Stripe Account Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm text-muted-foreground">
+                  Connection Status:
+                </span>
+                {getStripeStatusBadge()}
+              </div>
+
+              {isLoadingAccount ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                  <span className="text-sm text-muted-foreground">
+                    Loading account details...
+                  </span>
+                </div>
+              ) : (
+                stripeAccount && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Account ID:</span>
+                      <p className="font-mono text-xs">{stripeAccount.id}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Country:</span>
+                      <p>{stripeAccount.country.toUpperCase()}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">
+                        Charges Enabled:
+                      </span>
+                      <p>{stripeAccount.charges_enabled ? "Yes" : "No"}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">
+                        Payouts Enabled:
+                      </span>
+                      <p>{stripeAccount.payouts_enabled ? "Yes" : "No"}</p>
+                    </div>
+                  </div>
+                )
+              )}
+
+              {/* Requirements Section */}
+              {stripeAccount && stripeAccount.requirements && (
+                <div className="mt-4 pt-4 border-t">
+                  <h4 className="font-medium mb-2">Account Requirements</h4>
+                  <div className="space-y-2">
+                    {stripeAccount.requirements.currently_due.length > 0 && (
+                      <div>
+                        <h5 className="font-medium text-red-600 text-sm">
+                          Currently Due:
+                        </h5>
+                        <ul className="list-disc list-inside text-sm text-red-600">
+                          {stripeAccount.requirements.currently_due.map(
+                            (req, index) => (
+                              <li key={index}>{req}</li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                    {stripeAccount.requirements.eventually_due.length > 0 && (
+                      <div>
+                        <h5 className="font-medium text-yellow-600 text-sm">
+                          Eventually Due:
+                        </h5>
+                        <ul className="list-disc list-inside text-sm text-yellow-600">
+                          {stripeAccount.requirements.eventually_due.map(
+                            (req, index) => (
+                              <li key={index}>{req}</li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -184,6 +380,12 @@ export default function AdjudicatorPayments() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Stripe Connect Modal */}
+        <StripeConnectModal
+          isOpen={isStripeModalOpen}
+          onClose={handleStripeModalClose}
+        />
       </div>
     </AppLayout>
   );
