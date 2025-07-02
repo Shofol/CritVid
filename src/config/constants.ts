@@ -2,6 +2,10 @@ export const CREATE_ADJUDICATOR_PROFILE_FUNCTION = `${
   import.meta.env.VITE_SUPABASE_URL
 }/functions/v1/create-adjudicator-profile`;
 
+export const SAVE_ADJUDICATOR_PROFILE_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/save-adjudicator-profile`;
+
 export const GET_ADJUDICATORS_FUNCTION = `${
   import.meta.env.VITE_SUPABASE_URL
 }/functions/v1/get-approved-adjudicators`;
@@ -49,3 +53,7 @@ export const GENERATE_DANCE_SUGGESTIONS_FUNCTION = `${
 export const SAVE_VIDEO_FUNCTION = `${
   import.meta.env.VITE_SUPABASE_URL
 }/functions/v1/save-video`;
+
+export const UPDATE_USER_FUNCTION = `${
+  import.meta.env.VITE_SUPABASE_URL
+}/functions/v1/update-user`;

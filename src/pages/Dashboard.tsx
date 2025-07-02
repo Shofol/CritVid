@@ -12,9 +12,15 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchAdjudicatorProfile = async () => {
       const adjudicator = await getAdjudicatorByUserId(user.id);
-      if (adjudicator && adjudicator.approved !== true) {
+      if (
+        adjudicator &&
+        (adjudicator.status === "new" || adjudicator.status === "rejected")
+      ) {
         setIsAdjudicatorApproved(false);
         navigate("/adjudicator/apply");
+      } else if (adjudicator && adjudicator.status === "pending") {
+        setIsAdjudicatorApproved(false);
+        navigate("/adjudicator/application-status");
       } else {
         setIsAdjudicatorApproved(true);
       }

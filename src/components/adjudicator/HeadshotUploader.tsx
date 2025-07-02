@@ -53,42 +53,8 @@ const HeadshotUploader: React.FC<HeadshotUploaderProps> = ({
     setIsUploading(true);
 
     try {
-      // Convert image to JPEG if it's not already
-      let processedFile = file;
-      if (!file.type.includes("jpeg") && !file.type.includes("jpg")) {
-        const img = new Image();
-        img.src = objectUrl;
-        await new Promise((resolve) => {
-          img.onload = resolve;
-        });
-
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx?.drawImage(img, 0, 0);
-
-        // Convert to JPEG
-        const blob = await new Promise<Blob>((resolve) => {
-          canvas.toBlob(
-            (blob) => {
-              if (blob) resolve(blob);
-            },
-            "image/jpeg",
-            0.9
-          );
-        });
-        processedFile = new File(
-          [blob],
-          file.name.replace(/\.[^/.]+$/, ".jpg"),
-          {
-            type: "image/jpeg",
-          }
-        );
-      }
-
       if (onUploadComplete) {
-        onUploadComplete(objectUrl, processedFile);
+        onUploadComplete(objectUrl, file);
       }
 
       toast({
@@ -134,6 +100,7 @@ const HeadshotUploader: React.FC<HeadshotUploaderProps> = ({
 
       <div className="flex flex-col items-center space-y-2 max-w-2xl">
         <Button
+          type="button"
           variant="outline"
           onClick={() => {
             headshotInputRef.current.click();

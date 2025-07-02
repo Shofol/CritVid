@@ -92,7 +92,7 @@ export interface Adjudicator {
   turnaround_days: number;
   headshot: string;
   location: string;
-  approved: boolean;
+  status: "new" | "pending" | "approved" | "rejected";
   created_at: string;
   user_id: string;
   is_active: boolean;

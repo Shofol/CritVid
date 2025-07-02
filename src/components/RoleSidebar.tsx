@@ -1,7 +1,7 @@
 import { useApp } from "@/contexts/AppContext";
 import { getNavigationByRole } from "@/data/navigationData";
 import { cn } from "@/lib/utils";
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
 interface RoleSidebarProps {
@@ -11,11 +11,6 @@ interface RoleSidebarProps {
 const RoleSidebar: React.FC<RoleSidebarProps> = ({ className }) => {
   const location = useLocation();
   const { userRole, isAdjudicatorApproved } = useApp();
-
-  // Debug logging to check the current role
-  useEffect(() => {
-    console.log("Current user role in RoleSidebar:", userRole);
-  }, [userRole]);
 
   const isActive = (path: string) => {
     return (
@@ -28,16 +23,6 @@ const RoleSidebar: React.FC<RoleSidebarProps> = ({ className }) => {
     userRole,
     isAdjudicatorApproved
   );
-
-  // Debug logging to check the navigation items
-  useEffect(() => {
-    console.log(
-      "Navigation sections for role",
-      userRole,
-      ":",
-      navigationSections
-    );
-  }, [navigationSections, userRole]);
 
   return (
     <div

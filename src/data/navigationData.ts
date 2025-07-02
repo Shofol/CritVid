@@ -314,6 +314,5 @@ export function getNavigationByRole(
     },
   ];
 
-  console.log("Navigation sections result:", result);
   return result;
 }

@@ -57,7 +57,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const fetchAdjudicatorProfile = async () => {
       const adjudicator = await getAdjudicatorByUserId(user.id);
-      if (adjudicator && adjudicator.approved !== true) {
+      if (adjudicator && adjudicator.status !== "approved") {
         setIsAdjudicatorApproved(false);
       } else {
         setIsAdjudicatorApproved(true);

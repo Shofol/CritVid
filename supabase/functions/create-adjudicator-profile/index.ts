@@ -68,6 +68,25 @@ Deno.serve(async (req) => {
       }
       const blob = new Blob([bytes], { type: "image/jpeg" });
 
+      // Delete existing headshot files for this user
+      const { data: existingFiles, error: listError } =
+        await supabaseClient.storage.from("headshots").list(user.id);
+
+      if (!listError && existingFiles && existingFiles.length > 0) {
+        // Delete all existing files in the user's folder
+        const filesToDelete = existingFiles.map(
+          (file) => `${user.id}/${file.name}`
+        );
+        const { error: deleteError } = await supabaseClient.storage
+          .from("headshots")
+          .remove(filesToDelete);
+
+        if (deleteError) {
+          console.error("Error deleting existing headshot files:", deleteError);
+          // Continue with upload even if deletion fails
+        }
+      }
+
       const fileName = `${user.id}/${Date.now()}.jpg`;
       const { data: uploadData, error: uploadError } =
         await supabaseClient.storage.from("headshots").upload(fileName, blob, {

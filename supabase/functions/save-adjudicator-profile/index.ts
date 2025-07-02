@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "../_shared/cors.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 
 interface Certificate {
   title: string;
@@ -18,6 +23,7 @@ interface AdjudicatorProfile {
   headshot: string;
   certificates: Certificate[];
   dance_styles: number[];
+  location: string;
 }
 
 serve(async (req) => {
@@ -63,10 +69,53 @@ serve(async (req) => {
       const base64Data = matches[2];
       const fileExtension = contentType.split("/")[1];
 
+      // Convert base64 to Uint8Array
+      const binaryData = atob(base64Data);
+      const bytes = new Uint8Array(binaryData.length);
+      for (let i = 0; i < binaryData.length; i++) {
+        bytes[i] = binaryData.charCodeAt(i);
+      }
+
+      // Delete existing headshot files for this user
+      console.log("🔍 Checking for existing headshot files for user:", user.id);
+      const { data: existingFiles, error: listError } =
+        await supabaseClient.storage.from("headshots").list(user.id);
+
+      if (listError) {
+        console.error("❌ Error listing existing files:", listError);
+      } else {
+        console.log("📁 Found existing files:", existingFiles);
+      }
+
+      if (!listError && existingFiles && existingFiles.length > 0) {
+        // Delete all existing files in the user's folder
+        const filesToDelete = existingFiles.map(
+          (file) => `${user.id}/${file.name}`
+        );
+        console.log("🗑️ Attempting to delete files:", filesToDelete);
+
+        const { error: deleteError } = await supabaseClient.storage
+          .from("headshots")
+          .remove(filesToDelete);
+
+        if (deleteError) {
+          console.error(
+            "❌ Error deleting existing headshot files:",
+            deleteError
+          );
+          // Continue with upload even if deletion fails
+        } else {
+          console.log("✅ Successfully deleted existing files");
+        }
+      } else {
+        console.log("📝 No existing files to delete");
+      }
+
+      // Upload new headshot file
       const { data: uploadData, error: uploadError } =
         await supabaseClient.storage
           .from("headshots")
-          .upload(`${user.id}/${Date.now()}.${fileExtension}`, base64Data, {
+          .upload(`${user.id}/${Date.now()}.${fileExtension}`, bytes, {
             contentType: contentType,
             upsert: true,
           });
@@ -85,20 +134,37 @@ serve(async (req) => {
     // Save adjudicator profile
     const { data: profileData, error: profileError } = await supabaseClient
       .from("adj_profiles")
-      .upsert({
-        user_id: user.id,
-        name: profile.name,
-        email: profile.email,
-        experience: profile.experience,
-        exp_years: profile.exp_years,
-        ppc: profile.ppc,
-        turnaround_days: profile.turnaround_days,
-        headshot: headshotUrl,
-      })
+      .upsert(
+        {
+          user_id: user.id,
+          name: profile.name,
+          email: profile.email,
+          experience: profile.experience,
+          exp_years: profile.exp_years,
+          ppc: profile.ppc,
+          turnaround_days: profile.turnaround_days,
+          headshot: headshotUrl,
+          location: profile.location,
+        },
+        {
+          onConflict: "user_id",
+        }
+      )
       .select()
       .single();
 
     if (profileError) throw profileError;
+
+    // Delete existing certificates and dance styles for this adjudicator
+    await supabaseClient
+      .from("adjudicator_certificates")
+      .delete()
+      .eq("adjudicator_id", profileData.id);
+
+    await supabaseClient
+      .from("adj_dance_styles")
+      .delete()
+      .eq("adjudicator_id", profileData.id);
 
     // Save certificates
     if (profile.certificates?.length > 0) {
@@ -111,7 +177,7 @@ serve(async (req) => {
 
       const { error: certError } = await supabaseClient
         .from("adjudicator_certificates")
-        .upsert(certificates);
+        .insert(certificates);
 
       if (certError) throw certError;
     }
@@ -125,7 +191,7 @@ serve(async (req) => {
 
       const { error: styleError } = await supabaseClient
         .from("adj_dance_styles")
-        .upsert(danceStyles);
+        .insert(danceStyles);
 
       if (styleError) throw styleError;
     }
